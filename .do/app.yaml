@@ -81,8 +81,6 @@ databases:
     engine: PG
     version: "16"
     production: false
-    db_name: forum_db
-    db_user: forum_user
 
 ingress:
   rules:
