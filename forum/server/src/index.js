@@ -57,6 +57,13 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established');
 
+    // Grant schema permissions (needed for PostgreSQL 15+ managed databases)
+    try {
+      await sequelize.query('GRANT ALL ON SCHEMA public TO CURRENT_USER;');
+    } catch (e) {
+      // Ignore if already granted or insufficient privileges
+    }
+
     await sequelize.sync();
     logger.info('Database synced');
 
