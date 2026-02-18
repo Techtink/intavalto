@@ -1,6 +1,14 @@
 name: intavalto-forum
 region: nyc
 
+databases:
+  - cluster_name: schoolink-db
+    db_name: intavalto_forum
+    db_user: doadmin
+    engine: PG
+    name: db
+    production: true
+
 services:
   - name: api
     github:
@@ -28,24 +36,20 @@ services:
       - key: PORT
         value: "5000"
         scope: RUN_TIME
-      - key: DATABASE_URL
-        value: ${db.DATABASE_URL}
-        scope: RUN_TIME
       - key: DB_HOST
-        value: ${db.HOSTNAME}
+        value: schoolink-db-do-user-11668079-0.h.db.ondigitalocean.com
         scope: RUN_TIME
       - key: DB_PORT
-        value: ${db.PORT}
+        value: "25060"
         scope: RUN_TIME
       - key: DB_USER
-        value: ${db.USERNAME}
+        value: doadmin
         scope: RUN_TIME
       - key: DB_PASSWORD
-        value: ${db.PASSWORD}
         scope: RUN_TIME
         type: SECRET
       - key: DB_NAME
-        value: ${db.DATABASE}
+        value: intavalto_forum
         scope: RUN_TIME
       - key: DB_SSL
         value: "true"
@@ -78,12 +82,6 @@ static_sites:
     output_dir: build
     index_document: index.html
     error_document: index.html
-
-databases:
-  - name: db
-    engine: PG
-    version: "16"
-    production: false
 
 ingress:
   rules:
