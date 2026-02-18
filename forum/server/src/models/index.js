@@ -11,17 +11,24 @@ const dbOptions = {
   },
 };
 
-if (process.env.DB_SSL === 'true' || process.env.DATABASE_URL) {
+const useSSL = process.env.DB_SSL === 'true' || process.env.DATABASE_URL;
+if (useSSL) {
+  const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
   dbOptions.dialectOptions = {
     ssl: {
       require: true,
-      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+      rejectUnauthorized,
     },
   };
 }
 
-const sequelize = process.env.DATABASE_URL
-  ? new Sequelize(process.env.DATABASE_URL, dbOptions)
+// Strip sslmode from DATABASE_URL so dialectOptions.ssl takes precedence
+const dbUrl = process.env.DATABASE_URL
+  ? process.env.DATABASE_URL.replace(/[?&]sslmode=[^&]*/g, '').replace(/\?$/, '')
+  : null;
+
+const sequelize = dbUrl
+  ? new Sequelize(dbUrl, dbOptions)
   : new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
       ...dbOptions,
       host: process.env.DB_HOST,
