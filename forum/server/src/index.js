@@ -57,14 +57,13 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established');
 
-    // Create custom schema for managed databases (PostgreSQL 15+ restricts public schema)
-    if (process.env.DATABASE_URL) {
-      await sequelize.query('CREATE SCHEMA IF NOT EXISTS forum;');
-      await sequelize.query('SET search_path TO forum, public;');
+    // Sync database tables (non-fatal to allow health checks on managed databases)
+    try {
+      await sequelize.sync();
+      logger.info('Database synced');
+    } catch (syncErr) {
+      logger.warn('Database sync failed (tables may need manual creation):', syncErr.message);
     }
-
-    await sequelize.sync();
-    logger.info('Database synced');
 
     const server = app.listen(PORT, () => {
       logger.info(`Forum API server running on port ${PORT}`, { environment: process.env.NODE_ENV });

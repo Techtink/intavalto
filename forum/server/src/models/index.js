@@ -1,8 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-// Use custom schema on managed databases to avoid PostgreSQL 15 public schema restrictions
-const DB_SCHEMA = process.env.DATABASE_URL ? 'forum' : undefined;
-
 const dbOptions = {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
@@ -12,7 +9,6 @@ const dbOptions = {
     acquire: 30000,
     idle: 10000,
   },
-  ...(DB_SCHEMA && { define: { schema: DB_SCHEMA }, schema: DB_SCHEMA }),
 };
 
 const useSSL = process.env.DB_SSL === 'true' || process.env.DATABASE_URL;
