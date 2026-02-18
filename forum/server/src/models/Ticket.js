@@ -14,15 +14,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     category: {
-      type: DataTypes.ENUM('complaint', 'enquiry', 'bug_report', 'feature_request', 'other'),
+      type: DataTypes.STRING,
       defaultValue: 'enquiry'
     },
     priority: {
-      type: DataTypes.ENUM('low', 'medium', 'high', 'urgent'),
+      type: DataTypes.STRING,
       defaultValue: 'medium'
     },
     status: {
-      type: DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
+      type: DataTypes.STRING,
       defaultValue: 'open'
     },
     userId: {
