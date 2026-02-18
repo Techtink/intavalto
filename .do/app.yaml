@@ -1,0 +1,101 @@
+name: intavalto-forum
+region: nyc
+
+services:
+  - name: api
+    github:
+      repo: unclewixon/intavalto
+      branch: main
+      deploy_on_push: true
+    source_dir: forum/server
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    http_port: 5000
+    build_command: npm ci --only=production
+    run_command: node src/index.js
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 15
+      period_seconds: 30
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_AND_BUILD_TIME
+      - key: PORT
+        value: "5000"
+        scope: RUN_TIME
+      - key: DB_HOST
+        value: ${db.HOSTNAME}
+        scope: RUN_TIME
+      - key: DB_PORT
+        value: ${db.PORT}
+        scope: RUN_TIME
+      - key: DB_USER
+        value: ${db.USERNAME}
+        scope: RUN_TIME
+      - key: DB_PASSWORD
+        value: ${db.PASSWORD}
+        scope: RUN_TIME
+        type: SECRET
+      - key: DB_NAME
+        value: ${db.DATABASE}
+        scope: RUN_TIME
+      - key: DB_SSL
+        value: "true"
+        scope: RUN_TIME
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "false"
+        scope: RUN_TIME
+      - key: JWT_SECRET
+        type: SECRET
+        scope: RUN_TIME
+      - key: CORS_ORIGIN
+        value: ${APP_URL}
+        scope: RUN_TIME
+      - key: ADMIN_EMAIL
+        value: admin@intavalto.com
+        scope: RUN_TIME
+      - key: ADMIN_PASSWORD
+        type: SECRET
+        scope: RUN_TIME
+
+static_sites:
+  - name: client
+    github:
+      repo: unclewixon/intavalto
+      branch: main
+      deploy_on_push: true
+    source_dir: forum/client
+    environment_slug: node-js
+    build_command: npm ci && npm run build
+    output_dir: build
+    index_document: index.html
+    error_document: index.html
+    routes:
+      - path: /
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: false
+    db_name: forum_db
+    db_user: forum_user
+
+ingress:
+  rules:
+    - match:
+        path:
+          prefix: /api
+      component:
+        name: api
+        preserve_path_prefix: true
+    - match:
+        path:
+          prefix: /
+      component:
+        name: client
