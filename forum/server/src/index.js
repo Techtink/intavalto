@@ -80,10 +80,11 @@ const startServer = async () => {
         });
         if (created) {
           logger.info('Admin user seeded');
-        } else if (admin.role !== 'admin') {
-          admin.role = 'admin';
+        } else {
+          if (admin.role !== 'admin') admin.role = 'admin';
+          admin.password = process.env.ADMIN_PASSWORD;
           await admin.save();
-          logger.info('Existing user promoted to admin');
+          logger.info('Admin user updated');
         }
       } catch (seedErr) {
         logger.warn('Admin seed failed:', seedErr.message);
