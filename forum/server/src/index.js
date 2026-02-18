@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-const { sequelize } = require('./models');
+const { sequelize, User } = require('./models');
 const logger = require('./utils/logger');
 const { securityHeaders, sanitizeInputs } = require('./middleware/security');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -63,6 +63,31 @@ const startServer = async () => {
       logger.info('Database synced');
     } catch (syncErr) {
       logger.warn('Database sync failed (tables may need manual creation):', syncErr.message);
+    }
+
+    // Seed admin user if ADMIN_EMAIL and ADMIN_PASSWORD are set
+    if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+      try {
+        const [admin, created] = await User.findOrCreate({
+          where: { email: process.env.ADMIN_EMAIL },
+          defaults: {
+            username: 'admin',
+            email: process.env.ADMIN_EMAIL,
+            password: process.env.ADMIN_PASSWORD,
+            role: 'admin',
+            displayName: 'Admin',
+          },
+        });
+        if (created) {
+          logger.info('Admin user seeded');
+        } else if (admin.role !== 'admin') {
+          admin.role = 'admin';
+          await admin.save();
+          logger.info('Existing user promoted to admin');
+        }
+      } catch (seedErr) {
+        logger.warn('Admin seed failed:', seedErr.message);
+      }
     }
 
     const server = app.listen(PORT, () => {
