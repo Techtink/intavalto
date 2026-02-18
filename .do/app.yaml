@@ -4,7 +4,7 @@ region: nyc
 services:
   - name: api
     github:
-      repo: unclewixon/intavalto
+      repo: Techtink/intavalto
       branch: main
       deploy_on_push: true
     source_dir: forum/server
@@ -66,7 +66,7 @@ services:
 static_sites:
   - name: client
     github:
-      repo: unclewixon/intavalto
+      repo: Techtink/intavalto
       branch: main
       deploy_on_push: true
     source_dir: forum/client
@@ -75,8 +75,6 @@ static_sites:
     output_dir: build
     index_document: index.html
     error_document: index.html
-    routes:
-      - path: /
 
 databases:
   - name: db
