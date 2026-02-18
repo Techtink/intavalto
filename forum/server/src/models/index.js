@@ -1,8 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-const dbConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+const dbOptions = {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
@@ -13,8 +11,8 @@ const dbConfig = {
   },
 };
 
-if (process.env.DB_SSL === 'true') {
-  dbConfig.dialectOptions = {
+if (process.env.DB_SSL === 'true' || process.env.DATABASE_URL) {
+  dbOptions.dialectOptions = {
     ssl: {
       require: true,
       rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
@@ -22,12 +20,13 @@ if (process.env.DB_SSL === 'true') {
   };
 }
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  dbConfig
-);
+const sequelize = process.env.DATABASE_URL
+  ? new Sequelize(process.env.DATABASE_URL, dbOptions)
+  : new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+      ...dbOptions,
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+    });
 
 const db = {};
 

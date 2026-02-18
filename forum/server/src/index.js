@@ -57,11 +57,8 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established');
 
-    // In production, use migrations — never auto-sync
-    if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync();
-      logger.info('Database synced (development mode)');
-    }
+    await sequelize.sync();
+    logger.info('Database synced');
 
     const server = app.listen(PORT, () => {
       logger.info(`Forum API server running on port ${PORT}`, { environment: process.env.NODE_ENV });
