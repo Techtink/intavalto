@@ -57,11 +57,10 @@ const startServer = async () => {
     await sequelize.authenticate();
     logger.info('Database connection established');
 
-    // Fix schema permissions for PostgreSQL 15+ managed databases
-    try {
-      await sequelize.query('ALTER SCHEMA public OWNER TO CURRENT_USER;');
-    } catch (e) {
-      // Ignore - not all environments need this
+    // Create custom schema for managed databases (PostgreSQL 15+ restricts public schema)
+    if (process.env.DATABASE_URL) {
+      await sequelize.query('CREATE SCHEMA IF NOT EXISTS forum;');
+      await sequelize.query('SET search_path TO forum, public;');
     }
 
     await sequelize.sync();
