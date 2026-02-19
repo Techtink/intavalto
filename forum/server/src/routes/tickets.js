@@ -4,6 +4,7 @@ const { body } = require('express-validator');
 const { handleValidationErrors } = require('../middleware/validation');
 const { Ticket, TicketReply, User } = require('../models');
 const logger = require('../utils/logger');
+const { uploadTicketAttachment } = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -79,9 +80,10 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Create ticket
-router.post('/', authenticate, validateTicket, handleValidationErrors, async (req, res) => {
+router.post('/', authenticate, uploadTicketAttachment.array('attachments', 3), validateTicket, handleValidationErrors, async (req, res) => {
   try {
     const { subject, description, category, priority } = req.body;
+    const attachments = (req.files || []).map(f => `/uploads/tickets/${f.filename}`);
 
     const ticket = await Ticket.create({
       subject,
@@ -89,6 +91,7 @@ router.post('/', authenticate, validateTicket, handleValidationErrors, async (re
       category,
       priority: priority || 'medium',
       userId: req.user.id,
+      attachments,
     });
 
     res.status(201).json({ message: 'Ticket created', ticket });
@@ -99,7 +102,7 @@ router.post('/', authenticate, validateTicket, handleValidationErrors, async (re
 });
 
 // Add reply to ticket
-router.post('/:id/replies', authenticate, validateReply, handleValidationErrors, async (req, res) => {
+router.post('/:id/replies', authenticate, uploadTicketAttachment.array('attachments', 3), validateReply, handleValidationErrors, async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
@@ -113,12 +116,14 @@ router.post('/:id/replies', authenticate, validateReply, handleValidationErrors,
     }
 
     const isStaff = req.user.role === 'admin' || req.user.role === 'moderator';
+    const attachments = (req.files || []).map(f => `/uploads/tickets/${f.filename}`);
 
     const reply = await TicketReply.create({
       content: req.body.content,
       ticketId: ticket.id,
       userId: req.user.id,
       isStaff,
+      attachments,
     });
 
     // If staff replies, mark as in_progress

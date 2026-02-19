@@ -8,7 +8,7 @@ import LanguageSelector from '../components/LanguageSelector';
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 const FALLBACK_BG = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80';
 
-const inputClass = 'w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow';
+const inputClass = 'w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#50ba4b] focus:border-transparent transition-shadow';
 
 export default function Login() {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -20,6 +20,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [bgImage, setBgImage] = useState(FALLBACK_BG);
+  const [logoUrl, setLogoUrl] = useState(null);
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const { t } = useTranslation();
@@ -33,7 +34,14 @@ export default function Login() {
         }
       } catch (err) { /* use fallback */ }
     };
+    const fetchLogo = async () => {
+      try {
+        const { data } = await api.get('/settings/logo');
+        if (data.logoUrl) setLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
+      } catch (err) { /* use fallback */ }
+    };
     fetchWallpaper();
+    fetchLogo();
   }, []);
 
   const switchMode = (newMode) => {
@@ -92,7 +100,11 @@ export default function Login() {
       {/* Logo */}
       <div className="absolute top-6 left-8 z-20">
         <Link to="/" className="flex items-center gap-1.5">
-          <span className="text-[20px] font-bold text-white tracking-tight">Intavalto</span>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Intavalto" className="h-9 object-contain" />
+          ) : (
+            <span className="text-[20px] font-bold text-white tracking-tight">Intavalto</span>
+          )}
         </Link>
       </div>
 
@@ -128,7 +140,7 @@ export default function Login() {
                     placeholder={t('login.passwordPlaceholder')} className={inputClass} required />
                 </div>
                 <div className="flex items-center justify-end">
-                  <Link to="/forgot-password" className="text-[13px] text-blue-600 hover:text-blue-700 font-medium">
+                  <Link to="/forgot-password" className="text-[13px] text-[#50ba4b] hover:text-[#45a340] font-medium">
                     {t('login.forgotPassword')}
                   </Link>
                 </div>
@@ -140,7 +152,7 @@ export default function Login() {
 
               <p className="mt-7 text-center text-[13px] text-gray-500">
                 {t('login.newUser')}{' '}
-                <button onClick={() => switchMode('register')} className="text-blue-600 hover:text-blue-700 font-semibold">
+                <button onClick={() => switchMode('register')} className="text-[#50ba4b] hover:text-[#45a340] font-semibold">
                   {t('login.createAccount')}
                 </button>
               </p>
@@ -184,7 +196,7 @@ export default function Login() {
 
               <p className="mt-7 text-center text-[13px] text-gray-500">
                 {t('login.alreadyHaveAccount')}{' '}
-                <button onClick={() => switchMode('login')} className="text-blue-600 hover:text-blue-700 font-semibold">
+                <button onClick={() => switchMode('login')} className="text-[#50ba4b] hover:text-[#45a340] font-semibold">
                   {t('login.signIn')}
                 </button>
               </p>

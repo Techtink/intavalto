@@ -323,6 +323,31 @@ const updateLoginWallpaper = async (req, res) => {
   }
 };
 
+const updateLogo = async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+
+    if (req.file) {
+      if (settings.logoUrl) {
+        const oldPath = path.join(__dirname, '../..', settings.logoUrl);
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
+      }
+      settings.logoUrl = `/uploads/logos/${req.file.filename}`;
+      await settings.save();
+    }
+
+    res.json({ message: 'Logo updated', settings });
+  } catch (error) {
+    logger.error('Error updating logo', error);
+    res.status(500).json({ message: 'Failed to update logo' });
+  }
+};
+
 const updateEmailSettings = async (req, res) => {
   try {
     let settings = await SiteSettings.findOne();
@@ -394,6 +419,7 @@ module.exports = {
   getSiteSettings,
   updateSiteSettings,
   updateLoginWallpaper,
+  updateLogo,
   updateEmailSettings,
   updateSmsSettings,
 };

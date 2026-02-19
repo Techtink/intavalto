@@ -70,7 +70,7 @@ export default function Profile() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
       <div className="text-center">
         <p className="text-gray-500 dark:text-gray-400 mb-4">{t('profile.userNotFound')}</p>
-        <button onClick={() => navigate('/forum')} className="text-blue-600 hover:underline">{t('profile.backToForum')}</button>
+        <button onClick={() => navigate('/forum')} className="text-[#50ba4b] hover:underline">{t('profile.backToForum')}</button>
       </div>
     </div>
   );
@@ -111,14 +111,14 @@ export default function Profile() {
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">{t('profile.saveProfile')}</button>
+                <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">{t('profile.saveProfile')}</button>
                 <button type="button" onClick={() => setEditing(false)} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 text-sm">{t('profile.cancelEdit')}</button>
               </div>
             </form>
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-6">
-                <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-2xl font-bold text-blue-600 dark:text-blue-400 flex-shrink-0">
+                <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl font-bold text-[#50ba4b] dark:text-[#50ba4b] flex-shrink-0">
                   {profile.avatar ? (
                     <img src={profile.avatar} alt="" className="w-20 h-20 rounded-full object-cover" />
                   ) : (

@@ -68,7 +68,9 @@
       "selectProduct": "Select a product *",
       "categoryOptional": "Category (optional)",
       "tagsPlaceholder": "Tags (comma separated)",
-      "submitButton": "Create Topic"
+      "submitButton": "Create Topic",
+      "titleTooShort": "Title must be at least 5 characters",
+      "contentTooShort": "Content must be at least 20 characters"
     },
     "table": {
       "topic": "Topic",
@@ -196,6 +198,8 @@
     "descriptionLabel": "Description *",
     "descriptionPlaceholder": "Please describe your issue in detail (min 20 characters)",
     "submitButton": "Submit Ticket",
+    "attachmentsLabel": "Attachments (optional)",
+    "attachmentsHint": "Up to 3 images, max 5MB each. JPG, PNG, GIF, or WebP.",
     "myTickets": "My Tickets",
     "noTickets": "You haven't submitted any tickets yet.",
     "noTicketsFiltered": "No tickets with this status.",
@@ -382,6 +386,11 @@
       "wallpaperHint": "Recommended: 1920x1080px, max 5MB. JPG, PNG, GIF, or WebP.",
       "saveWallpaper": "Save Wallpaper",
       "wallpaperSaved": "Login wallpaper updated successfully",
+      "logoTitle": "Site Logo",
+      "logoDesc": "Upload a logo to display in the forum header and login page. Recommended: transparent PNG.",
+      "logoHint": "Max 2MB. PNG with transparent background works best.",
+      "saveLogo": "Save Logo",
+      "logoSaved": "Logo updated successfully",
       "emailTitle": "Email Configuration (SMTP)",
       "emailDesc": "Configure SMTP settings for sending transactional emails.",
       "smtpHostLabel": "SMTP Host",

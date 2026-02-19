@@ -55,4 +55,44 @@ const uploadWallpaper = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-module.exports = { uploadBanner, uploadWallpaper };
+// Logo upload
+const logoDir = path.join(__dirname, '../../uploads/logos');
+if (!fs.existsSync(logoDir)) {
+  fs.mkdirSync(logoDir, { recursive: true });
+}
+
+const logoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, logoDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `logo-${Date.now()}${ext}`);
+  },
+});
+
+const uploadLogo = multer({
+  storage: logoStorage,
+  fileFilter,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max
+});
+
+// Ticket attachment upload
+const ticketDir = path.join(__dirname, '../../uploads/tickets');
+if (!fs.existsSync(ticketDir)) {
+  fs.mkdirSync(ticketDir, { recursive: true });
+}
+
+const ticketStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, ticketDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `ticket-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
+  },
+});
+
+const uploadTicketAttachment = multer({
+  storage: ticketStorage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+});
+
+module.exports = { uploadBanner, uploadWallpaper, uploadLogo, uploadTicketAttachment };

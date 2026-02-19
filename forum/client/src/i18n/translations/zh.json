@@ -68,7 +68,9 @@
       "selectProduct": "选择产品 *",
       "categoryOptional": "分类（可选）",
       "tagsPlaceholder": "标签（逗号分隔）",
-      "submitButton": "创建话题"
+      "submitButton": "创建话题",
+      "titleTooShort": "标题至少需要5个字符",
+      "contentTooShort": "内容至少需要20个字符"
     },
     "table": {
       "topic": "话题",
@@ -196,6 +198,8 @@
     "descriptionLabel": "描述 *",
     "descriptionPlaceholder": "请详细描述您的问题（至少20个字符）",
     "submitButton": "提交工单",
+    "attachmentsLabel": "附件（可选）",
+    "attachmentsHint": "最多3张图片，每张最大5MB。支持 JPG、PNG、GIF 或 WebP。",
     "myTickets": "我的工单",
     "noTickets": "您还没有提交过工单。",
     "noTicketsFiltered": "没有此状态的工单。",
@@ -382,6 +386,11 @@
       "wallpaperHint": "建议：1920x1080像素，最大5MB。支持 JPG、PNG、GIF 或 WebP。",
       "saveWallpaper": "保存壁纸",
       "wallpaperSaved": "登录页壁纸更新成功",
+      "logoTitle": "网站标志",
+      "logoDesc": "上传标志以显示在论坛页眉和登录页面。建议：透明背景的 PNG。",
+      "logoHint": "最大 2MB。透明背景的 PNG 效果最佳。",
+      "saveLogo": "保存标志",
+      "logoSaved": "标志更新成功",
       "emailTitle": "邮件配置 (SMTP)",
       "emailDesc": "配置 SMTP 设置以发送事务性邮件。",
       "smtpHostLabel": "SMTP 主机",

@@ -11,10 +11,14 @@ export default function BannerSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingWallpaper, setSavingWallpaper] = useState(false);
+  const [savingLogo, setSavingLogo] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [wallpaperPreview, setWallpaperPreview] = useState(null);
   const [selectedWallpaper, setSelectedWallpaper] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [selectedLogo, setSelectedLogo] = useState(null);
+  const [currentLogoUrl, setCurrentLogoUrl] = useState(null);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [bannerEnabled, setBannerEnabled] = useState(false);
@@ -36,6 +40,9 @@ export default function BannerSettings() {
       }
       if (data.loginWallpaperUrl) {
         setCurrentWallpaperUrl(`${API_ORIGIN}${data.loginWallpaperUrl}`);
+      }
+      if (data.logoUrl) {
+        setCurrentLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
       }
     } catch (err) {
       console.error('Failed to load settings:', err);
@@ -112,6 +119,36 @@ export default function BannerSettings() {
     }
   };
 
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedLogo(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSaveLogo = async (e) => {
+    e.preventDefault();
+    if (!selectedLogo) return;
+    setSavingLogo(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('logo', selectedLogo);
+      const { data } = await api.put('/admin/settings/logo', formData);
+      if (data.settings.logoUrl) {
+        setCurrentLogoUrl(`${API_ORIGIN}${data.settings.logoUrl}`);
+      }
+      setSelectedLogo(null);
+      setLogoPreview(null);
+      showSuccess(t('admin.settings.logoSaved'));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update logo');
+    } finally {
+      setSavingLogo(false);
+    }
+  };
+
   const showSuccess = (msg) => {
     setSuccess(msg);
     setTimeout(() => setSuccess(''), 3000);
@@ -140,7 +177,7 @@ export default function BannerSettings() {
           </div>
           <button type="button" onClick={() => setBannerEnabled(!bannerEnabled)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              bannerEnabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+              bannerEnabled ? 'bg-[#50ba4b]' : 'bg-gray-300 dark:bg-gray-600'
             }`}>
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
               bannerEnabled ? 'translate-x-6' : 'translate-x-1'
@@ -159,7 +196,7 @@ export default function BannerSettings() {
           <input type="file" accept="image/*" onChange={handleFileChange}
             className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4
             file:rounded file:border-0 file:text-sm file:font-medium
-            file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400" />
+            file:bg-green-50 file:text-[#45a340] hover:file:bg-green-100 dark:file:bg-green-900/30 dark:file:text-[#50ba4b]" />
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('admin.settings.bannerImageHint')}</p>
         </div>
 
@@ -168,7 +205,7 @@ export default function BannerSettings() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.settings.bannerTitleLabel')}</label>
           <input type="text" value={bannerTitle} onChange={(e) => setBannerTitle(e.target.value)}
             placeholder={t('admin.settings.bannerTitlePlaceholder')}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
         </div>
 
         {/* Subtitle */}
@@ -176,13 +213,36 @@ export default function BannerSettings() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('admin.settings.bannerSubtitleLabel')}</label>
           <input type="text" value={bannerSubtitle} onChange={(e) => setBannerSubtitle(e.target.value)}
             placeholder={t('admin.settings.bannerSubtitlePlaceholder')}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
         </div>
 
         {/* Save */}
         <button type="submit" disabled={saving}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 transition-colors">
+          className="bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
           {saving ? t('admin.settings.saving') : t('admin.settings.saveSettings')}
+        </button>
+      </form>
+
+      {/* Logo Upload */}
+      <form onSubmit={handleSaveLogo} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 max-w-2xl mt-6 transition-colors">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('admin.settings.logoTitle')}</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{t('admin.settings.logoDesc')}</p>
+
+        {(logoPreview || currentLogoUrl) && (
+          <div className="mb-3 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg inline-block">
+            <img src={logoPreview || currentLogoUrl} alt="Logo preview" className="h-12 object-contain" />
+          </div>
+        )}
+
+        <input type="file" accept="image/*" onChange={handleLogoChange}
+          className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4
+          file:rounded file:border-0 file:text-sm file:font-medium
+          file:bg-green-50 file:text-[#45a340] hover:file:bg-green-100 dark:file:bg-green-900/30 dark:file:text-[#50ba4b]" />
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('admin.settings.logoHint')}</p>
+
+        <button type="submit" disabled={savingLogo || !selectedLogo}
+          className="mt-4 bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
+          {savingLogo ? t('admin.settings.saving') : t('admin.settings.saveLogo')}
         </button>
       </form>
 
@@ -200,11 +260,11 @@ export default function BannerSettings() {
         <input type="file" accept="image/*" onChange={handleWallpaperChange}
           className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4
           file:rounded file:border-0 file:text-sm file:font-medium
-          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400" />
+          file:bg-green-50 file:text-[#45a340] hover:file:bg-green-100 dark:file:bg-green-900/30 dark:file:text-[#50ba4b]" />
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('admin.settings.wallpaperHint')}</p>
 
         <button type="submit" disabled={savingWallpaper || !selectedWallpaper}
-          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 transition-colors">
+          className="mt-4 bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
           {savingWallpaper ? t('admin.settings.saving') : t('admin.settings.saveWallpaper')}
         </button>
       </form>

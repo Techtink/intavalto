@@ -127,7 +127,7 @@ export default function PostDetail() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
       <div className="text-center">
         <p className="text-gray-500 dark:text-gray-400 mb-4">{t('postDetail.postNotFound')}</p>
-        <button onClick={() => navigate('/forum')} className="text-blue-600 hover:underline">{t('postDetail.backToForum')}</button>
+        <button onClick={() => navigate('/forum')} className="text-[#50ba4b] hover:underline">{t('postDetail.backToForum')}</button>
       </div>
     </div>
   );
@@ -153,7 +153,7 @@ export default function PostDetail() {
               <input type="text" value={editPost.tags} onChange={(e) => setEditPost({ ...editPost, tags: e.target.value })}
                 placeholder={t('postDetail.tagsPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
               <div className="flex gap-2">
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">{t('postDetail.savePost')}</button>
+                <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">{t('postDetail.savePost')}</button>
                 <button type="button" onClick={() => setEditingPost(false)} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 text-sm">{t('postDetail.cancelEdit')}</button>
               </div>
             </form>
@@ -169,14 +169,14 @@ export default function PostDetail() {
                 </div>
                 {canEditPost && (
                   <div className="flex gap-2 ml-4">
-                    <button onClick={startEditPost} className="text-blue-600 hover:text-blue-800 text-sm">{t('postDetail.editPost')}</button>
+                    <button onClick={startEditPost} className="text-[#50ba4b] hover:text-[#45a340] text-sm">{t('postDetail.editPost')}</button>
                     <button onClick={handleDeletePost} className="text-red-600 hover:text-red-800 text-sm">{t('postDetail.deletePost')}</button>
                   </div>
                 )}
               </div>
 
               <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 gap-2 mb-6 flex-wrap">
-                <Link to={`/profile/${post.User?.id}`} className="hover:text-blue-600">{post.User?.username}</Link>
+                <Link to={`/profile/${post.User?.id}`} className="hover:text-[#50ba4b]">{post.User?.username}</Link>
                 <span>&middot;</span>
                 <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                 <span>&middot;</span>
@@ -197,7 +197,7 @@ export default function PostDetail() {
                   </>
                 )}
                 {post.tags?.length > 0 && post.tags.map(tag => (
-                  <span key={tag} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-xs">{tag}</span>
+                  <span key={tag} className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-[#50ba4b] dark:text-[#50ba4b] rounded text-xs">{tag}</span>
                 ))}
               </div>
 
@@ -220,16 +220,16 @@ export default function PostDetail() {
           {user && !post.isLocked && (
             <form onSubmit={handleAddComment} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow transition-colors">
               <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)}
-                placeholder={t('postDetail.commentPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                placeholder={t('postDetail.commentPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
                 rows="3" required />
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">{t('postDetail.postComment')}</button>
+              <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">{t('postDetail.postComment')}</button>
             </form>
           )}
 
           {!user && !post.isLocked && (
             <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              <Link to="/login" className="text-blue-600 hover:underline font-medium">{t('postDetail.loginToComment')}</Link> or{' '}
-              <Link to="/login" className="text-blue-600 hover:underline font-medium">{t('postDetail.signupToComment')}</Link> {t('postDetail.joinDiscussion')}
+              <Link to="/login" className="text-[#50ba4b] hover:underline font-medium">{t('postDetail.loginToComment')}</Link> or{' '}
+              <Link to="/login" className="text-[#50ba4b] hover:underline font-medium">{t('postDetail.signupToComment')}</Link> {t('postDetail.joinDiscussion')}
             </div>
           )}
 
@@ -244,7 +244,7 @@ export default function PostDetail() {
               <div key={comment.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow transition-colors">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <Link to={`/profile/${comment.User?.id}`} className="font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600">
+                    <Link to={`/profile/${comment.User?.id}`} className="font-semibold text-gray-900 dark:text-gray-100 hover:text-[#50ba4b]">
                       {comment.User?.username}
                     </Link>
                     <span className="text-gray-400 dark:text-gray-500">&middot;</span>
@@ -252,7 +252,7 @@ export default function PostDetail() {
                   </div>
                   {canEditComment(comment) && editingCommentId !== comment.id && (
                     <div className="flex gap-2">
-                      <button onClick={() => startEditComment(comment)} className="text-blue-600 hover:text-blue-800 text-xs">{t('common.edit')}</button>
+                      <button onClick={() => startEditComment(comment)} className="text-[#50ba4b] hover:text-[#45a340] text-xs">{t('common.edit')}</button>
                       <button onClick={() => handleDeleteComment(comment.id)} className="text-red-600 hover:text-red-800 text-xs">{t('common.delete')}</button>
                     </div>
                   )}
@@ -262,7 +262,7 @@ export default function PostDetail() {
                     <textarea value={editCommentContent} onChange={(e) => setEditCommentContent(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows="3" />
                     <div className="flex gap-2">
-                      <button onClick={() => handleUpdateComment(comment.id)} className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">{t('common.save')}</button>
+                      <button onClick={() => handleUpdateComment(comment.id)} className="bg-[#50ba4b] text-white px-3 py-1 rounded text-xs hover:bg-[#45a340]">{t('common.save')}</button>
                       <button onClick={() => setEditingCommentId(null)} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1 rounded text-xs hover:bg-gray-300 dark:hover:bg-gray-500">{t('common.cancel')}</button>
                     </div>
                   </div>

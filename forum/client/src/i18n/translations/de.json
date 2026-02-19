@@ -68,7 +68,9 @@
       "selectProduct": "Produkt auswählen *",
       "categoryOptional": "Kategorie (optional)",
       "tagsPlaceholder": "Tags (kommagetrennt)",
-      "submitButton": "Thema Erstellen"
+      "submitButton": "Thema Erstellen",
+      "titleTooShort": "Der Titel muss mindestens 5 Zeichen lang sein",
+      "contentTooShort": "Der Inhalt muss mindestens 20 Zeichen lang sein"
     },
     "table": {
       "topic": "Thema",
@@ -196,6 +198,8 @@
     "descriptionLabel": "Beschreibung *",
     "descriptionPlaceholder": "Bitte beschreiben Sie Ihr Problem im Detail (min. 20 Zeichen)",
     "submitButton": "Ticket Einreichen",
+    "attachmentsLabel": "Anhänge (optional)",
+    "attachmentsHint": "Bis zu 3 Bilder, max 5MB pro Bild. JPG, PNG, GIF oder WebP.",
     "myTickets": "Meine Tickets",
     "noTickets": "Sie haben noch keine Tickets eingereicht.",
     "noTicketsFiltered": "Keine Tickets mit diesem Status.",
@@ -382,6 +386,11 @@
       "wallpaperHint": "Empfohlen: 1920x1080px, max 5MB. JPG, PNG, GIF oder WebP.",
       "saveWallpaper": "Hintergrundbild Speichern",
       "wallpaperSaved": "Anmeldeseiten-Hintergrundbild erfolgreich aktualisiert",
+      "logoTitle": "Website-Logo",
+      "logoDesc": "Laden Sie ein Logo hoch, das im Forum-Header und auf der Anmeldeseite angezeigt wird. Empfohlen: transparentes PNG.",
+      "logoHint": "Max 2MB. PNG mit transparentem Hintergrund funktioniert am besten.",
+      "saveLogo": "Logo Speichern",
+      "logoSaved": "Logo erfolgreich aktualisiert",
       "emailTitle": "E-Mail-Konfiguration (SMTP)",
       "emailDesc": "Konfigurieren Sie die SMTP-Einstellungen für den Versand von E-Mails.",
       "smtpHostLabel": "SMTP-Host",

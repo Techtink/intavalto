@@ -68,7 +68,9 @@
       "selectProduct": "Sélectionner un produit *",
       "categoryOptional": "Catégorie (optionnel)",
       "tagsPlaceholder": "Étiquettes (séparées par des virgules)",
-      "submitButton": "Créer le Sujet"
+      "submitButton": "Créer le Sujet",
+      "titleTooShort": "Le titre doit contenir au moins 5 caractères",
+      "contentTooShort": "Le contenu doit contenir au moins 20 caractères"
     },
     "table": {
       "topic": "Sujet",
@@ -196,6 +198,8 @@
     "descriptionLabel": "Description *",
     "descriptionPlaceholder": "Veuillez décrire votre problème en détail (min 20 caractères)",
     "submitButton": "Soumettre le Ticket",
+    "attachmentsLabel": "Pièces jointes (optionnel)",
+    "attachmentsHint": "Jusqu'à 3 images, max 5 Mo chacune. JPG, PNG, GIF ou WebP.",
     "myTickets": "Mes Tickets",
     "noTickets": "Vous n'avez pas encore soumis de tickets.",
     "noTicketsFiltered": "Aucun ticket avec ce statut.",
@@ -381,6 +385,11 @@
       "wallpaperDesc": "Cette image apparaîtra comme arrière-plan sur la page de connexion.",
       "wallpaperHint": "Recommandé : 1920x1080px, max 5 Mo. JPG, PNG, GIF ou WebP.",
       "saveWallpaper": "Enregistrer le Fond d'écran",
+      "logoTitle": "Logo du site",
+      "logoDesc": "Téléchargez un logo à afficher dans l'en-tête du forum et la page de connexion. Recommandé : PNG transparent.",
+      "logoHint": "Max 2 Mo. Un PNG avec fond transparent fonctionne mieux.",
+      "saveLogo": "Enregistrer le logo",
+      "logoSaved": "Logo mis à jour avec succès",
       "wallpaperSaved": "Fond d'écran de connexion mis à jour avec succès",
       "emailTitle": "Configuration Email (SMTP)",
       "emailDesc": "Configurez les paramètres SMTP pour l'envoi d'emails transactionnels.",

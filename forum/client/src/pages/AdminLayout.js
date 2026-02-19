@@ -52,7 +52,7 @@ export default function AdminLayout() {
           {navItems.map(item => (
             <Link key={item.path} to={item.path}
               className={`block px-4 py-2 rounded text-sm transition-colors ${
-                isActive(item) ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                isActive(item) ? 'bg-[#50ba4b] text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
               }`}>
               {t(item.labelKey)}
             </Link>

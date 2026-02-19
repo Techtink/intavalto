@@ -35,7 +35,7 @@ export default function LanguageSelector() {
               key={lang.code}
               onClick={() => { setLanguage(lang.code); setOpen(false); }}
               className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                language === lang.code ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'
+                language === lang.code ? 'text-[#50ba4b] dark:text-[#50ba4b] font-medium' : 'text-gray-700 dark:text-gray-300'
               }`}
             >
               <span>{lang.nativeLabel}</span>

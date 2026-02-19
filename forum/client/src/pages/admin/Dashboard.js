@@ -65,7 +65,7 @@ export default function AdminDashboard() {
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow transition-colors">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{t('admin.dashboard.openTickets')}</h3>
-          <p className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">{stats?.openTickets}</p>
+          <p className="mt-2 text-3xl font-bold text-[#50ba4b] dark:text-[#50ba4b]">{stats?.openTickets}</p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow transition-colors">

@@ -29,4 +29,16 @@ router.get('/login', async (req, res) => {
   }
 });
 
+// Public endpoint — returns logo URL (no auth required)
+router.get('/logo', async (req, res) => {
+  try {
+    const settings = await SiteSettings.findOne({
+      attributes: ['logoUrl'],
+    });
+    res.json({ logoUrl: settings?.logoUrl || null });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch logo' });
+  }
+});
+
 module.exports = router;

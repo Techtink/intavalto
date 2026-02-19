@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useTranslation } from '../../i18n';
+import EmojiPicker from '../../components/EmojiPicker';
 
 export default function ProductManagement() {
   const { t } = useTranslation();
@@ -98,7 +99,7 @@ export default function ProductManagement() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('admin.productMgmt.title')}</h1>
         <button onClick={() => { resetForm(); setShowForm(!showForm); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+          className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">
           {showForm && !editingId ? t('common.cancel') : t('admin.productMgmt.newButton')}
         </button>
       </div>
@@ -127,8 +128,7 @@ export default function ProductManagement() {
             </div>
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.productMgmt.iconLabel')}</label>
-              <input type="text" value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" placeholder={t('admin.productMgmt.iconPlaceholder')} />
+              <EmojiPicker value={formData.icon} onChange={(val) => setFormData({ ...formData, icon: val })} />
             </div>
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.productMgmt.colorLabel')}</label>
@@ -141,7 +141,7 @@ export default function ProductManagement() {
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+            <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">
               {editingId ? t('admin.productMgmt.updateButton') : t('admin.productMgmt.createButton')}
             </button>
             <button type="button" onClick={resetForm} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 text-sm">{t('common.cancel')}</button>
@@ -186,7 +186,7 @@ export default function ProductManagement() {
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{prod.displayOrder}</td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
-                      <button onClick={() => startEdit(prod)} className="text-blue-600 hover:text-blue-800 text-sm">{t('common.edit')}</button>
+                      <button onClick={() => startEdit(prod)} className="text-[#50ba4b] hover:text-[#45a340] text-sm">{t('common.edit')}</button>
                       <button onClick={() => handleDelete(prod.id)} className="text-red-600 hover:text-red-800 text-sm">{t('common.delete')}</button>
                     </div>
                   </td>

@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    logoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     // Email (SMTP) Configuration
     smtpHost: {
       type: DataTypes.STRING,

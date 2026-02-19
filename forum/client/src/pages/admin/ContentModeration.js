@@ -102,14 +102,14 @@ export default function ContentModeration() {
                       <>
                         {post.content.substring(0, 300)}
                         {post.content.length > 300 && (
-                          <button onClick={() => setExpandedId(post.id)} className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
+                          <button onClick={() => setExpandedId(post.id)} className="text-[#50ba4b] dark:text-[#50ba4b] hover:underline ml-1">
                             {t('admin.moderation.showMore')}
                           </button>
                         )}
                       </>
                     )}
                     {expandedId === post.id && post.content.length > 300 && (
-                      <button onClick={() => setExpandedId(null)} className="text-blue-600 dark:text-blue-400 hover:underline ml-1 block mt-1">
+                      <button onClick={() => setExpandedId(null)} className="text-[#50ba4b] dark:text-[#50ba4b] hover:underline ml-1 block mt-1">
                         {t('admin.moderation.showLess')}
                       </button>
                     )}
@@ -118,7 +118,7 @@ export default function ContentModeration() {
                   {post.tags?.length > 0 && (
                     <div className="flex gap-1 mb-4">
                       {post.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-xs">{tag}</span>
+                        <span key={tag} className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-[#50ba4b] dark:text-[#50ba4b] rounded text-xs">{tag}</span>
                       ))}
                     </div>
                   )}

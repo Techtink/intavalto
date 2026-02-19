@@ -68,7 +68,9 @@
       "selectProduct": "Elige productum *",
       "categoryOptional": "Categoria (optionale)",
       "tagsPlaceholder": "Signa (virgula separata)",
-      "submitButton": "Crea Thema"
+      "submitButton": "Crea Thema",
+      "titleTooShort": "Titulus minimum 5 characteres habere debet",
+      "contentTooShort": "Contentum minimum 20 characteres habere debet"
     },
     "table": {
       "topic": "Thema",
@@ -196,6 +198,8 @@
     "descriptionLabel": "Descriptio *",
     "descriptionPlaceholder": "Quaeso describe problema tuum in detailio (min 20 characteres)",
     "submitButton": "Submitte Tesseram",
+    "attachmentsLabel": "Adnexiones (optionale)",
+    "attachmentsHint": "Usque ad 3 imagines, max 5MB per imaginem. JPG, PNG, GIF, vel WebP.",
     "myTickets": "Tesserae Meae",
     "noTickets": "Nullas tesseras adhuc submisisti.",
     "noTicketsFiltered": "Nullae tesserae cum hoc statu.",
@@ -382,6 +386,11 @@
       "wallpaperHint": "Commendatum: 1920x1080px, max 5MB. JPG, PNG, GIF, vel WebP.",
       "saveWallpaper": "Serva Tapetum",
       "wallpaperSaved": "Tapetum introitus cum successu renovatum",
+      "logoTitle": "Signum Situs",
+      "logoDesc": "Leva signum quod in capite fori et pagina introitus monstratur. Commendatum: PNG pellucens.",
+      "logoHint": "Max 2MB. PNG cum fundo pellucente optime operatur.",
+      "saveLogo": "Serva Signum",
+      "logoSaved": "Signum cum successu renovatum",
       "emailTitle": "Configuratio Epistulae (SMTP)",
       "emailDesc": "Configura parametra SMTP ad epistulas transactionales mittendas.",
       "smtpHostLabel": "Hospes SMTP",

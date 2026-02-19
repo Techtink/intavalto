@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: true
     },
+    attachments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     ticketNumber: {
       type: DataTypes.INTEGER,
       autoIncrement: true,

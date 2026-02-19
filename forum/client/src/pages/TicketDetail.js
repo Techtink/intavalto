@@ -4,8 +4,10 @@ import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 
+const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+
 const statusColors = {
-  open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  open: 'bg-green-100 text-[#45a340] dark:bg-green-900/30 dark:text-[#50ba4b]',
   in_progress: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   resolved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   closed: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
@@ -13,7 +15,7 @@ const statusColors = {
 
 const priorityColors = {
   low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-  medium: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  medium: 'bg-green-100 text-[#50ba4b] dark:bg-green-900/30 dark:text-[#50ba4b]',
   high: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
   urgent: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
 };
@@ -25,6 +27,7 @@ export default function TicketDetail() {
   const [ticket, setTicket] = useState(null);
   const [replies, setReplies] = useState([]);
   const [newReply, setNewReply] = useState('');
+  const [replyAttachments, setReplyAttachments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { t } = useTranslation();
@@ -49,9 +52,13 @@ export default function TicketDetail() {
     e.preventDefault();
     setError('');
     try {
-      const { data } = await api.post(`/tickets/${id}/replies`, { content: newReply });
+      const fd = new FormData();
+      fd.append('content', newReply);
+      replyAttachments.forEach(file => fd.append('attachments', file));
+      const { data } = await api.post(`/tickets/${id}/replies`, fd);
       setReplies([...replies, data.reply]);
       setNewReply('');
+      setReplyAttachments([]);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add reply');
     }
@@ -72,7 +79,7 @@ export default function TicketDetail() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
       <div className="text-center">
         <p className="text-gray-500 dark:text-gray-400 mb-4">{t('ticketDetail.ticketNotFound')}</p>
-        <Link to="/support" className="text-blue-600 hover:underline">{t('ticketDetail.backToSupportLink')}</Link>
+        <Link to="/support" className="text-[#50ba4b] hover:underline">{t('ticketDetail.backToSupportLink')}</Link>
       </div>
     </div>
   );
@@ -130,6 +137,16 @@ export default function TicketDetail() {
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
             {ticket.description}
           </div>
+          {ticket.attachments && ticket.attachments.length > 0 && (
+            <div className="flex gap-3 mt-4 flex-wrap">
+              {ticket.attachments.map((url, i) => (
+                <a key={i} href={`${API_ORIGIN}${url}`} target="_blank" rel="noopener noreferrer"
+                  className="block w-24 h-24 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:opacity-80 transition-opacity">
+                  <img src={`${API_ORIGIN}${url}`} alt="" className="w-full h-full object-cover" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Replies */}
@@ -142,18 +159,28 @@ export default function TicketDetail() {
             </div>
           ) : (
             replies.map(reply => (
-              <div key={reply.id} className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 transition-colors ${reply.isStaff ? 'border-l-4 border-l-blue-500' : ''}`}>
+              <div key={reply.id} className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 transition-colors ${reply.isStaff ? 'border-l-4 border-l-[#50ba4b]' : ''}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${reply.isStaff ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${reply.isStaff ? 'bg-green-100 text-[#50ba4b] dark:bg-green-900/30 dark:text-[#50ba4b]' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
                     {(reply.User?.username || '?')[0].toUpperCase()}
                   </div>
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{reply.User?.displayName || reply.User?.username}</span>
                   {reply.isStaff && (
-                    <span className="px-1.5 py-0.5 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-semibold uppercase">{t('ticketDetail.staff')}</span>
+                    <span className="px-1.5 py-0.5 bg-green-100 text-[#50ba4b] dark:bg-green-900/30 dark:text-[#50ba4b] rounded text-[10px] font-semibold uppercase">{t('ticketDetail.staff')}</span>
                   )}
                   <span className="text-xs text-gray-400 dark:text-gray-500">{new Date(reply.createdAt).toLocaleString()}</span>
                 </div>
                 <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap ml-9">{reply.content}</div>
+                {reply.attachments && reply.attachments.length > 0 && (
+                  <div className="flex gap-2 mt-2 ml-9 flex-wrap">
+                    {reply.attachments.map((url, i) => (
+                      <a key={i} href={`${API_ORIGIN}${url}`} target="_blank" rel="noopener noreferrer"
+                        className="block w-20 h-20 rounded border border-gray-200 dark:border-gray-700 overflow-hidden hover:opacity-80 transition-opacity">
+                        <img src={`${API_ORIGIN}${url}`} alt="" className="w-full h-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -164,7 +191,23 @@ export default function TicketDetail() {
           <form onSubmit={handleReply} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 transition-colors">
             <textarea value={newReply} onChange={(e) => setNewReply(e.target.value)}
               placeholder={t('ticketDetail.replyPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" rows="4" required />
-            <button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+            <div className="mb-3">
+              <input type="file" accept="image/*" multiple
+                onChange={(e) => setReplyAttachments(Array.from(e.target.files).slice(0, 3))}
+                className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-1.5 file:px-3
+                file:rounded file:border-0 file:text-xs file:font-medium
+                file:bg-green-50 file:text-[#45a340] hover:file:bg-green-100 dark:file:bg-green-900/30 dark:file:text-[#50ba4b]" />
+              {replyAttachments.length > 0 && (
+                <div className="flex gap-2 mt-2">
+                  {replyAttachments.map((file, i) => (
+                    <div key={i} className="w-12 h-12 rounded border border-gray-200 dark:border-gray-700 overflow-hidden">
+                      <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button type="submit" className="bg-[#50ba4b] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#45a340]">
               {t('ticketDetail.sendReply')}
             </button>
           </form>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../../utils/api';
 import { useTranslation } from '../../../i18n';
 
-const inputClass = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400';
+const inputClass = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400';
 
 export default function SmsSection({ settings, onSuccess, onError }) {
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ export default function SmsSection({ settings, onSuccess, onError }) {
       </div>
 
       <button type="submit" disabled={saving}
-        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 transition-colors">
+        className="bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
         {saving ? t('admin.settings.saving') : t('admin.settings.saveSmsSettings')}
       </button>
     </form>

@@ -52,7 +52,7 @@ export default function Register() {
           <h2 className="text-center text-3xl font-extrabold text-gray-900">{t('register.title')}</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {t('register.alreadyHaveAccount')}{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">{t('register.signIn')}</Link>
+            <Link to="/login" className="text-[#50ba4b] hover:text-[#50ba4b] font-medium">{t('register.signIn')}</Link>
           </p>
         </div>
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>

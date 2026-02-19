@@ -31,6 +31,7 @@ export default function Forum() {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [allTags, setAllTags] = useState([]);
   const [banner, setBanner] = useState(null);
+  const [logoUrl, setLogoUrl] = useState(null);
   const [cookieAccepted, setCookieAccepted] = useState(() => localStorage.getItem('cookieConsent') === 'true');
   const [cookieDismissing, setCookieDismissing] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
@@ -143,7 +144,14 @@ export default function Forum() {
         if (data.bannerEnabled) setBanner(data);
       } catch (error) { /* non-critical */ }
     };
+    const fetchLogo = async () => {
+      try {
+        const { data } = await api.get('/settings/logo');
+        if (data.logoUrl) setLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
+      } catch (error) { /* non-critical */ }
+    };
     fetchBanner();
+    fetchLogo();
   }, []);
 
   // Close dropdowns on outside click
@@ -278,7 +286,11 @@ export default function Forum() {
               </svg>
             </button>
             <Link to="/" className="flex items-center gap-1.5">
-              <span className="text-[18px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">Intavalto</span>
+              {logoUrl ? (
+                <img src={logoUrl} alt="Intavalto" className="h-8 object-contain" />
+              ) : (
+                <span className="text-[18px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">Intavalto</span>
+              )}
               <span className="text-[18px] font-light text-gray-500 dark:text-gray-400">Forum</span>
             </Link>
           </div>
@@ -298,16 +310,16 @@ export default function Forum() {
                   <form onSubmit={handleSearch} className="flex gap-1.5">
                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={t('forum.header.searchPlaceholder')} autoFocus
-                      className="flex-1 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-[12px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                      className="flex-1 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-[12px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#50ba4b]" />
                     <button type="submit"
-                      className="bg-[#0E76FD] text-white px-2.5 py-1.5 text-[12px] font-medium hover:bg-blue-700">
+                      className="bg-[#50ba4b] text-white px-2.5 py-1.5 text-[12px] font-medium hover:bg-[#45a340]">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </button>
                   </form>
                   {isSearching && (
-                    <button onClick={clearSearch} className="mt-1.5 text-[11px] text-blue-600 hover:underline">{t('forum.header.clearSearch')}</button>
+                    <button onClick={clearSearch} className="mt-1.5 text-[11px] text-[#50ba4b] hover:underline">{t('forum.header.clearSearch')}</button>
                   )}
                 </div>
               )}
@@ -335,18 +347,18 @@ export default function Forum() {
             {user ? (
               <div className="flex items-center gap-2 ml-1">
                 <Link to={`/profile/${user.id}`}
-                  className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold"
+                  className="w-8 h-8 rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-xs font-bold"
                   title={user.displayName || user.username}>
                   {(user.displayName || user.username || '?')[0].toUpperCase()}
                 </Link>
                 {user.role === 'admin' && (
-                  <Link to="/admin" className="text-xs text-blue-600 hover:underline hidden sm:block">Admin</Link>
+                  <Link to="/admin" className="text-xs text-[#50ba4b] hover:underline hidden sm:block">Admin</Link>
                 )}
                 <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hidden sm:block">{t('common.logout')}</button>
               </div>
             ) : (
               <Link to="/login"
-                className="ml-2 bg-transparent text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-500 px-3 py-[4px] rounded-full text-[11px] font-medium hover:bg-[#0E76FD] hover:text-white hover:border-[#0E76FD] transition-colors">
+                className="ml-2 bg-transparent text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-500 px-3 py-[4px] rounded-full text-[11px] font-medium hover:bg-[#50ba4b] hover:text-white hover:border-[#50ba4b] transition-colors">
                 {t('common.logIn')}
               </Link>
             )}
@@ -405,14 +417,14 @@ export default function Forum() {
                 </svg>
                 {t('forum.sidebar.developerPlatform')}
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()}
+              <a href="https://intavalto.com/" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
                 <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 {t('forum.sidebar.officialWeb')}
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()}
+              <a href="https://intavaltoretail.com/" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
                 <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -527,14 +539,14 @@ export default function Forum() {
               <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 pt-3 mt-3 mx-2 space-y-[1px]">
                 <Link to={`/profile/${user.id}`} onClick={() => setSidebarOpen(false)}
                   className="flex items-center gap-2 px-3 py-[7px] text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">
-                  <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">
+                  <div className="w-5 h-5 rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold">
                     {(user.displayName || user.username || '?')[0].toUpperCase()}
                   </div>
                   {user.displayName || user.username}
                 </Link>
                 {user.role === 'admin' && (
                   <Link to="/admin" onClick={() => setSidebarOpen(false)}
-                    className="block px-3 py-[7px] text-[13px] text-blue-600 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">{t('forum.sidebar.adminPanel')}</Link>
+                    className="block px-3 py-[7px] text-[13px] text-[#50ba4b] hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">{t('forum.sidebar.adminPanel')}</Link>
                 )}
                 <button onClick={() => { handleLogout(); setSidebarOpen(false); }}
                   className="block w-full text-left px-3 py-[7px] text-[13px] text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">{t('common.logout')}</button>
@@ -595,12 +607,12 @@ export default function Forum() {
                   {showCatDropdown && (
                     <div className="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1">
                       <button onClick={() => selectCategory('')}
-                        className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${!selectedCategory ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                        className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${!selectedCategory ? 'text-[#50ba4b] font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
                         {t('forum.filters.allCategories')}
                       </button>
                       {categories.map(cat => (
                         <button key={cat.id} onClick={() => selectCategory(cat.id)}
-                          className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${selectedCategory === cat.id ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                          className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${selectedCategory === cat.id ? 'text-[#50ba4b] font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
                           <span className="w-[10px] h-[10px] rounded-[2px]" style={{ backgroundColor: cat.color || '#6B7280' }} />
                           {cat.name}
                         </button>
@@ -621,12 +633,12 @@ export default function Forum() {
                   {showTagDropdown && (
                     <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1 max-h-60 overflow-y-auto">
                       <button onClick={() => selectTag('')}
-                        className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${!selectedTag ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                        className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${!selectedTag ? 'text-[#50ba4b] font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
                         {t('forum.filters.allTags')}
                       </button>
                       {allTags.map(tag => (
                         <button key={tag} onClick={() => selectTag(tag)}
-                          className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedTag === tag ? 'text-blue-600 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                          className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedTag === tag ? 'text-[#50ba4b] font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
                           {tag}
                         </button>
                       ))}
@@ -648,7 +660,7 @@ export default function Forum() {
                 {/* New Topic */}
                 {user && (
                   <button onClick={() => setShowNewPost(!showNewPost)}
-                    className="bg-[#0E76FD] text-white px-3 py-[5px] rounded text-[12px] font-medium hover:bg-blue-700 whitespace-nowrap transition-colors">
+                    className="bg-[#50ba4b] text-white px-3 py-[5px] rounded text-[12px] font-medium hover:bg-[#45a340] whitespace-nowrap transition-colors">
                     {showNewPost ? t('forum.newPost.cancelButton') : t('forum.newPost.button')}
                   </button>
                 )}
@@ -659,14 +671,14 @@ export default function Forum() {
                 {isSearching ? (
                   <div className="py-1 text-[12px] text-gray-500 dark:text-gray-400">
                     {t('forum.searchResults')} &ldquo;<strong className="text-gray-700 dark:text-gray-200">{searchQuery}</strong>&rdquo;
-                    <button onClick={clearSearch} className="ml-2 text-blue-600 hover:underline text-[11px]">{t('forum.filters.clear')}</button>
+                    <button onClick={clearSearch} className="ml-2 text-[#50ba4b] hover:underline text-[11px]">{t('forum.filters.clear')}</button>
                   </div>
                 ) : (
                   <>
                     <button onClick={() => { selectProduct(''); setSelectedTag(''); }}
                       className={`px-4 py-[6px] rounded text-[12px] font-medium whitespace-nowrap transition-colors border ${
                         !selectedProduct
-                          ? 'bg-[#0E76FD] text-white border-[#0E76FD]'
+                          ? 'bg-[#50ba4b] text-white border-[#50ba4b]'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}>
                       {t('common.all')}
@@ -678,7 +690,7 @@ export default function Forum() {
                             ? 'text-white'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
-                        style={selectedProduct === prod.id ? { backgroundColor: prod.color || '#0E76FD', borderColor: prod.color || '#0E76FD' } : {}}>
+                        style={selectedProduct === prod.id ? { backgroundColor: prod.color || '#50ba4b', borderColor: prod.color || '#50ba4b' } : {}}>
                         {prod.name}
                       </button>
                     ))}
@@ -692,7 +704,7 @@ export default function Forum() {
           {selectedTag && (
             <div className="mx-4 lg:mx-5 mt-3 px-4 py-2.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center gap-2 transition-colors">
               <span className="text-[13px] text-gray-500 dark:text-gray-400">{t('forum.filters.filteredByTag')}</span>
-              <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-[12px] font-medium">{selectedTag}</span>
+              <span className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-[#50ba4b] dark:text-[#50ba4b] rounded text-[12px] font-medium">{selectedTag}</span>
               <button onClick={() => setSelectedTag('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-[11px] ml-1">&times; {t('forum.filters.clear')}</button>
             </div>
           )}
@@ -705,10 +717,22 @@ export default function Forum() {
               <form onSubmit={handleCreatePost}>
                 <input type="text" placeholder={t('forum.newPost.titlePlaceholder')} value={newPost.title}
                   onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded mb-2.5 text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                  className={`w-full px-3 py-2 border rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${newPost.title.length > 0 && newPost.title.length < 5 ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 dark:border-gray-600 focus:ring-[#50ba4b]'}`} required />
+                <div className="flex justify-between mb-2.5 mt-0.5">
+                  <span className={`text-[11px] ${newPost.title.length > 0 && newPost.title.length < 5 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {newPost.title.length > 0 && newPost.title.length < 5 ? t('forum.newPost.titleTooShort') : ''}
+                  </span>
+                  <span className={`text-[11px] ${newPost.title.length > 0 && newPost.title.length < 5 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>{newPost.title.length}/5 min</span>
+                </div>
                 <textarea placeholder={t('forum.newPost.contentPlaceholder')} value={newPost.content}
                   onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded mb-2.5 text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5" required />
+                  className={`w-full px-3 py-2 border rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${newPost.content.length > 0 && newPost.content.length < 20 ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 dark:border-gray-600 focus:ring-[#50ba4b]'}`} rows="5" required />
+                <div className="flex justify-between mb-2.5 mt-0.5">
+                  <span className={`text-[11px] ${newPost.content.length > 0 && newPost.content.length < 20 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {newPost.content.length > 0 && newPost.content.length < 20 ? t('forum.newPost.contentTooShort') : ''}
+                  </span>
+                  <span className={`text-[11px] ${newPost.content.length > 0 && newPost.content.length < 20 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>{newPost.content.length}/20 min</span>
+                </div>
                 <div className="flex gap-2.5 mb-3 flex-wrap">
                   <select value={newPost.productId} onChange={(e) => setNewPost({ ...newPost, productId: e.target.value })}
                     className="flex-1 min-w-[160px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" required>
@@ -724,7 +748,8 @@ export default function Forum() {
                     onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
                     className="flex-1 min-w-[160px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
                 </div>
-                <button type="submit" className="bg-[#0E76FD] text-white px-5 py-2 rounded text-[13px] font-medium hover:bg-blue-700 transition-colors">
+                <button type="submit" disabled={newPost.title.length < 5 || newPost.content.length < 20}
+                  className="bg-[#50ba4b] text-white px-5 py-2 rounded text-[13px] font-medium hover:bg-[#45a340] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   {t('forum.newPost.submitButton')}
                 </button>
               </form>
@@ -766,7 +791,7 @@ export default function Forum() {
                           )}
                           <div className="min-w-0 flex-1">
                             {/* Title */}
-                            <h3 className="text-[14px] font-semibold text-[#222] dark:text-gray-100 leading-[1.3] group-hover:text-[#0E76FD] transition-colors">
+                            <h3 className="text-[14px] font-semibold text-[#222] dark:text-gray-100 leading-[1.3] group-hover:text-[#50ba4b] transition-colors">
                               {post.title}
                             </h3>
 
@@ -796,14 +821,14 @@ export default function Forum() {
                             <p className="text-[12.5px] text-gray-400 dark:text-gray-500 mt-[6px] leading-[1.5] line-clamp-2">
                               {post.content?.substring(0, 200)}
                               {post.content?.length > 200 && (
-                                <span className="text-blue-500 ml-1">{t('forum.readMore')}</span>
+                                <span className="text-[#50ba4b] ml-1">{t('forum.readMore')}</span>
                               )}
                             </p>
 
                             {/* Author avatars */}
                             <div className="flex items-center gap-2 mt-[8px]">
                               <div className="flex -space-x-1.5">
-                                <div className="w-[24px] h-[24px] rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-white dark:ring-gray-800"
+                                <div className="w-[24px] h-[24px] rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-white dark:ring-gray-800"
                                   title={post.User?.username}>
                                   {(post.User?.username || '?')[0].toUpperCase()}
                                 </div>
@@ -816,7 +841,7 @@ export default function Forum() {
                       {/* Replies column */}
                       <div className="hidden md:flex items-center justify-center h-full">
                         <span className={`text-[14px] font-semibold ${
-                          (post.replyCount || 0) >= 10 ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300'
+                          (post.replyCount || 0) >= 10 ? 'text-[#50ba4b]' : 'text-gray-600 dark:text-gray-300'
                         }`}>{post.replyCount || 0}</span>
                       </div>
 
@@ -866,7 +891,7 @@ export default function Forum() {
           <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4 flex-wrap">
             <p className="text-[13px] leading-relaxed flex-1">
               {t('cookie.message')}{' '}
-              <a href="#" onClick={(e) => e.preventDefault()} className="underline hover:text-blue-300">{t('cookie.learnMore')}</a>
+              <a href="#" onClick={(e) => e.preventDefault()} className="underline hover:text-green-300">{t('cookie.learnMore')}</a>
             </p>
             <button onClick={acceptCookies}
               className="bg-white text-[#333] px-5 py-2 rounded text-[13px] font-semibold hover:bg-gray-100 whitespace-nowrap transition-colors">

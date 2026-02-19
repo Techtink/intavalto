@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    attachments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW

@@ -1,7 +1,7 @@
 const express = require('express');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const adminController = require('../controllers/adminController');
-const { uploadBanner, uploadWallpaper } = require('../middleware/upload');
+const { uploadBanner, uploadWallpaper, uploadLogo } = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -31,6 +31,7 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 router.get('/settings', adminController.getSiteSettings);
 router.put('/settings', uploadBanner.single('bannerImage'), adminController.updateSiteSettings);
 router.put('/settings/wallpaper', uploadWallpaper.single('loginWallpaper'), adminController.updateLoginWallpaper);
+router.put('/settings/logo', uploadLogo.single('logo'), adminController.updateLogo);
 router.put('/settings/email', adminController.updateEmailSettings);
 router.put('/settings/sms', adminController.updateSmsSettings);
 

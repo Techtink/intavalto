@@ -4,7 +4,7 @@ import api from '../../utils/api';
 import { useTranslation } from '../../i18n';
 
 const statusColors = {
-  open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  open: 'bg-green-100 text-[#45a340] dark:bg-green-900/30 dark:text-[#50ba4b]',
   in_progress: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   resolved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   closed: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
@@ -12,7 +12,7 @@ const statusColors = {
 
 const priorityColors = {
   low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-  medium: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+  medium: 'bg-green-100 text-[#50ba4b] dark:bg-green-900/30 dark:text-[#50ba4b]',
   high: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
   urgent: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
 };
@@ -138,7 +138,7 @@ export default function TicketManagement() {
                 <tr key={ticket.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                   <td className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">{ticket.ticketNumber}</td>
                   <td className="px-4 py-3">
-                    <Link to={`/support/${ticket.id}`} className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                    <Link to={`/support/${ticket.id}`} className="text-sm font-medium text-[#50ba4b] dark:text-[#50ba4b] hover:underline">
                       {ticket.subject}
                     </Link>
                   </td>
@@ -171,7 +171,7 @@ export default function TicketManagement() {
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    <Link to={`/support/${ticket.id}`} className="text-blue-600 dark:text-blue-400 hover:underline text-sm">{t('admin.tickets.view')}</Link>
+                    <Link to={`/support/${ticket.id}`} className="text-[#50ba4b] dark:text-[#50ba4b] hover:underline text-sm">{t('admin.tickets.view')}</Link>
                   </td>
                 </tr>
               ))}
