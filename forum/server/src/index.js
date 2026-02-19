@@ -59,7 +59,7 @@ const startServer = async () => {
 
     // Sync database tables (non-fatal to allow health checks on managed databases)
     try {
-      await sequelize.sync({ alter: true });
+      await sequelize.sync();
       logger.info('Database synced');
     } catch (syncErr) {
       logger.warn('Database sync failed (tables may need manual creation):', syncErr.message);
