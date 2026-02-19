@@ -25,6 +25,40 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // Email (SMTP) Configuration
+    smtpHost: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    smtpPort: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    smtpUser: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    smtpPassword: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    emailFromAddress: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    emailFromName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    // SMS (Termii) Configuration
+    termiiApiKey: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    termiiSenderId: {
+      type: DataTypes.STRING(11),
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

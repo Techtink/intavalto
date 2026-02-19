@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../utils/api';
 import { useTranslation } from '../../i18n';
+import EmailSection from './settings/EmailSection';
+import SmsSection from './settings/SmsSection';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
@@ -20,28 +22,29 @@ export default function BannerSettings() {
   const [bannerSubtitle, setBannerSubtitle] = useState('');
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [currentWallpaperUrl, setCurrentWallpaperUrl] = useState(null);
+  const [settings, setSettings] = useState(null);
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get('/admin/settings');
-        setBannerEnabled(data.bannerEnabled || false);
-        setBannerTitle(data.bannerTitle || '');
-        setBannerSubtitle(data.bannerSubtitle || '');
-        if (data.bannerImageUrl) {
-          setCurrentImageUrl(`${API_ORIGIN}${data.bannerImageUrl}`);
-        }
-        if (data.loginWallpaperUrl) {
-          setCurrentWallpaperUrl(`${API_ORIGIN}${data.loginWallpaperUrl}`);
-        }
-      } catch (err) {
-        console.error('Failed to load settings:', err);
-      } finally {
-        setLoading(false);
+  const fetchSettings = useCallback(async () => {
+    try {
+      const { data } = await api.get('/admin/settings');
+      setSettings(data);
+      setBannerEnabled(data.bannerEnabled || false);
+      setBannerTitle(data.bannerTitle || '');
+      setBannerSubtitle(data.bannerSubtitle || '');
+      if (data.bannerImageUrl) {
+        setCurrentImageUrl(`${API_ORIGIN}${data.bannerImageUrl}`);
       }
-    };
-    fetchSettings();
+      if (data.loginWallpaperUrl) {
+        setCurrentWallpaperUrl(`${API_ORIGIN}${data.loginWallpaperUrl}`);
+      }
+    } catch (err) {
+      console.error('Failed to load settings:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -71,8 +74,7 @@ export default function BannerSettings() {
       }
       setSelectedFile(null);
       setPreview(null);
-      setSuccess('Banner settings saved successfully');
-      setTimeout(() => setSuccess(''), 3000);
+      showSuccess('Banner settings saved successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save settings');
     } finally {
@@ -102,13 +104,17 @@ export default function BannerSettings() {
       }
       setSelectedWallpaper(null);
       setWallpaperPreview(null);
-      setSuccess('Login wallpaper updated successfully');
-      setTimeout(() => setSuccess(''), 3000);
+      showSuccess('Login wallpaper updated successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update wallpaper');
     } finally {
       setSavingWallpaper(false);
     }
+  };
+
+  const showSuccess = (msg) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   const displayImage = preview || currentImageUrl;
@@ -202,6 +208,9 @@ export default function BannerSettings() {
           {savingWallpaper ? t('admin.settings.saving') : t('admin.settings.saveWallpaper')}
         </button>
       </form>
+
+      <EmailSection settings={settings} onSuccess={showSuccess} onError={setError} />
+      <SmsSection settings={settings} onSuccess={showSuccess} onError={setError} />
     </div>
   );
 }

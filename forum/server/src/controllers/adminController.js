@@ -252,7 +252,10 @@ const getSiteSettings = async (req, res) => {
     if (!settings) {
       settings = await SiteSettings.create({});
     }
-    res.json(settings);
+    const settingsJson = settings.toJSON();
+    if (settingsJson.smtpPassword) settingsJson.smtpPassword = '********';
+    if (settingsJson.termiiApiKey) settingsJson.termiiApiKey = '********';
+    res.json(settingsJson);
   } catch (error) {
     logger.error('Error fetching site settings', error);
     res.status(500).json({ message: 'Failed to fetch site settings' });
@@ -320,6 +323,62 @@ const updateLoginWallpaper = async (req, res) => {
   }
 };
 
+const updateEmailSettings = async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+
+    const { smtpHost, smtpPort, smtpUser, smtpPassword, emailFromAddress, emailFromName } = req.body;
+
+    if (smtpHost !== undefined) settings.smtpHost = smtpHost;
+    if (smtpPort !== undefined) settings.smtpPort = smtpPort ? parseInt(smtpPort, 10) : null;
+    if (smtpUser !== undefined) settings.smtpUser = smtpUser;
+    if (smtpPassword !== undefined && smtpPassword !== '********') {
+      settings.smtpPassword = smtpPassword;
+    }
+    if (emailFromAddress !== undefined) settings.emailFromAddress = emailFromAddress;
+    if (emailFromName !== undefined) settings.emailFromName = emailFromName;
+
+    await settings.save();
+
+    const settingsJson = settings.toJSON();
+    if (settingsJson.smtpPassword) settingsJson.smtpPassword = '********';
+    if (settingsJson.termiiApiKey) settingsJson.termiiApiKey = '********';
+    res.json({ message: 'Email settings updated', settings: settingsJson });
+  } catch (error) {
+    logger.error('Error updating email settings', error);
+    res.status(500).json({ message: 'Failed to update email settings' });
+  }
+};
+
+const updateSmsSettings = async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+
+    const { termiiApiKey, termiiSenderId } = req.body;
+
+    if (termiiApiKey !== undefined && termiiApiKey !== '********') {
+      settings.termiiApiKey = termiiApiKey;
+    }
+    if (termiiSenderId !== undefined) settings.termiiSenderId = termiiSenderId;
+
+    await settings.save();
+
+    const settingsJson = settings.toJSON();
+    if (settingsJson.smtpPassword) settingsJson.smtpPassword = '********';
+    if (settingsJson.termiiApiKey) settingsJson.termiiApiKey = '********';
+    res.json({ message: 'SMS settings updated', settings: settingsJson });
+  } catch (error) {
+    logger.error('Error updating SMS settings', error);
+    res.status(500).json({ message: 'Failed to update SMS settings' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -335,4 +394,6 @@ module.exports = {
   getSiteSettings,
   updateSiteSettings,
   updateLoginWallpaper,
+  updateEmailSettings,
+  updateSmsSettings,
 };

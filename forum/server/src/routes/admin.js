@@ -31,5 +31,7 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 router.get('/settings', adminController.getSiteSettings);
 router.put('/settings', uploadBanner.single('bannerImage'), adminController.updateSiteSettings);
 router.put('/settings/wallpaper', uploadWallpaper.single('loginWallpaper'), adminController.updateLoginWallpaper);
+router.put('/settings/email', adminController.updateEmailSettings);
+router.put('/settings/sms', adminController.updateSmsSettings);
 
 module.exports = router;
