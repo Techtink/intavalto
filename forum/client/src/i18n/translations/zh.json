@@ -25,7 +25,8 @@
     "open": "待处理",
     "inProgress": "处理中",
     "resolved": "已解决",
-    "closed": "已关闭"
+    "closed": "已关闭",
+    "saving": "保存中..."
   },
   "forum": {
     "title": "论坛",
@@ -285,7 +286,15 @@
       "confirmBan": "确认封禁",
       "roleUpdated": "角色已更新",
       "userBanned": "用户已封禁",
-      "userUnbanned": "用户已解封"
+      "userUnbanned": "用户已解封",
+      "createUser": "+ 创建用户",
+      "createSuccess": "用户创建成功",
+      "username": "用户名",
+      "usernamePlaceholder": "输入用户名",
+      "emailPlaceholder": "输入邮箱",
+      "password": "密码",
+      "passwordPlaceholder": "至少6个字符",
+      "displayNamePlaceholder": "输入显示名称"
     },
     "moderation": {
       "title": "内容审核",
@@ -456,6 +465,11 @@
     "inTheLast7Days": "过去7天",
     "today": "今天",
     "allTime": "总计"
+  },
+  "avatar": {
+    "cropTitle": "裁剪头像",
+    "saveAvatar": "保存头像",
+    "uploadSuccess": "头像更新成功"
   },
   "badges": {
     "title": "徽章",

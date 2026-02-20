@@ -14,6 +14,9 @@ export default function UserManagement() {
   const [banReason, setBanReason] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({ username: '', email: '', password: '', displayName: '', role: 'user' });
+  const [creating, setCreating] = useState(false);
   const { t } = useTranslation();
 
   const fetchUsers = useCallback(async () => {
@@ -82,6 +85,24 @@ export default function UserManagement() {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setError('');
+    setCreating(true);
+    try {
+      await api.post('/admin/users', createForm);
+      setShowCreateModal(false);
+      setCreateForm({ username: '', email: '', password: '', displayName: '', role: 'user' });
+      setSuccess(t('admin.users.createSuccess'));
+      setTimeout(() => setSuccess(''), 3000);
+      fetchUsers();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create user');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="p-8 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">{t('admin.users.title')}</h1>
@@ -90,7 +111,7 @@ export default function UserManagement() {
       {success && <div className="bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-3 rounded-lg mb-4 text-sm">{success}</div>}
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <div className="flex gap-3 mb-6 flex-wrap items-center">
         <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
           placeholder={t('admin.users.searchPlaceholder')} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm w-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
         <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
@@ -106,6 +127,13 @@ export default function UserManagement() {
           <option value="active">{t('admin.users.active')}</option>
           <option value="banned">{t('admin.users.banned')}</option>
         </select>
+        <button onClick={() => setShowCreateModal(true)}
+          className="ml-auto bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium flex items-center gap-1.5">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          {t('admin.users.createUser')}
+        </button>
       </div>
 
       {loading ? (
@@ -193,6 +221,63 @@ export default function UserManagement() {
               <button onClick={() => setBanModalUser(null)} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 text-sm">{t('common.cancel')}</button>
               <button onClick={handleBanUser} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm">{t('admin.users.confirmBan')}</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 transition-colors">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('admin.users.createUser')}</h3>
+            <form onSubmit={handleCreateUser} className="space-y-3">
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.users.username')} *</label>
+                <input type="text" required value={createForm.username}
+                  onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder={t('admin.users.usernamePlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.users.tableEmail')} *</label>
+                <input type="email" required value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder={t('admin.users.emailPlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.users.password')} *</label>
+                <input type="password" required value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder={t('admin.users.passwordPlaceholder')} minLength={6} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('profile.displayNameLabel')}</label>
+                <input type="text" value={createForm.displayName}
+                  onChange={(e) => setCreateForm({ ...createForm, displayName: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  placeholder={t('admin.users.displayNamePlaceholder')} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{t('admin.users.tableRole')}</label>
+                <select value={createForm.role}
+                  onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                  <option value="user">{t('admin.users.user')}</option>
+                  <option value="moderator">{t('admin.users.moderator')}</option>
+                  <option value="admin">{t('admin.users.admin')}</option>
+                </select>
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button type="button" onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">{t('common.cancel')}</button>
+                <button type="submit" disabled={creating}
+                  className="px-4 py-2 text-sm bg-[#50ba4b] text-white rounded-lg hover:bg-[#45a340] disabled:opacity-50">
+                  {creating ? t('common.saving') : t('admin.users.createUser')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

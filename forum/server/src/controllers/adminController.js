@@ -426,6 +426,49 @@ const updateAboutSettings = async (req, res) => {
   }
 };
 
+// Create User (admin only)
+const createUser = async (req, res) => {
+  try {
+    const { username, email, password, displayName, role } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Username, email, and password are required' });
+    }
+
+    const validRoles = ['user', 'moderator', 'admin'];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be user, moderator, or admin' });
+    }
+
+    // Check for duplicates
+    const existing = await User.findOne({
+      where: {
+        [Op.or]: [{ email }, { username }],
+      },
+    });
+    if (existing) {
+      const field = existing.email === email ? 'email' : 'username';
+      return res.status(409).json({ message: `A user with that ${field} already exists` });
+    }
+
+    const user = await User.create({
+      username,
+      email,
+      password, // hashed by User model beforeCreate hook
+      displayName: displayName || username,
+      role: role || 'user',
+    });
+
+    const userJson = user.toJSON();
+    delete userJson.password;
+
+    res.status(201).json({ message: 'User created', user: userJson });
+  } catch (error) {
+    logger.error('Error creating user', error);
+    res.status(500).json({ message: 'Failed to create user' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -445,4 +488,5 @@ module.exports = {
   updateEmailSettings,
   updateSmsSettings,
   updateAboutSettings,
+  createUser,
 };

@@ -2,8 +2,11 @@ const express = require('express');
 const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
+const { uploadAvatar } = require('../middleware/upload');
 const { User } = require('../models');
 const logger = require('../utils/logger');
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
 
@@ -18,11 +21,6 @@ const validateProfileUpdate = [
     .trim()
     .isLength({ max: 500 })
     .withMessage('Bio cannot exceed 500 characters'),
-  body('avatar')
-    .optional()
-    .trim()
-    .isURL()
-    .withMessage('Avatar must be a valid URL'),
 ];
 
 router.get('/:id', authenticate, async (req, res) => {
@@ -44,7 +42,7 @@ router.put('/:id', authenticate, validateProfileUpdate, handleValidationErrors, 
       return res.status(403).json({ message: 'Cannot update another user' });
     }
 
-    const { displayName, bio, avatar } = req.body;
+    const { displayName, bio } = req.body;
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] }
     });
@@ -53,13 +51,46 @@ router.put('/:id', authenticate, validateProfileUpdate, handleValidationErrors, 
 
     if (displayName !== undefined) user.displayName = displayName;
     if (bio !== undefined) user.bio = bio;
-    if (avatar !== undefined) user.avatar = avatar;
 
     await user.save();
     res.json({ message: 'Profile updated', user });
   } catch (error) {
     logger.error('Error updating user profile', error);
     res.status(500).json({ message: 'Failed to update profile' });
+  }
+});
+
+// Avatar file upload
+router.put('/:id/avatar', authenticate, uploadAvatar.single('avatar'), async (req, res) => {
+  try {
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Cannot update another user\'s avatar' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const user = await User.findByPk(req.params.id, {
+      attributes: { exclude: ['password'] }
+    });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Delete old avatar file if it exists
+    if (user.avatar && user.avatar.startsWith('/uploads/avatars/')) {
+      const oldPath = path.join(__dirname, '../..', user.avatar);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    user.avatar = `/uploads/avatars/${req.file.filename}`;
+    await user.save();
+
+    res.json({ message: 'Avatar updated', user });
+  } catch (error) {
+    logger.error('Error uploading avatar', error);
+    res.status(500).json({ message: 'Failed to upload avatar' });
   }
 });
 

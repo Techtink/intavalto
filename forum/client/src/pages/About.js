@@ -404,17 +404,26 @@ export default function About() {
                   {/* Our Admins */}
                   <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-4">{t('about.ourAdmins')}</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-                    {stats.admins.map(admin => (
-                      <Link key={admin.id} to={`/profile/${admin.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                        <div className="w-10 h-10 rounded-full bg-[#50ba4b] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                          {(admin.displayName || admin.username || '?')[0].toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{admin.displayName || admin.username}</p>
-                          <p className="text-[11px] text-gray-400 dark:text-gray-500">Admin</p>
-                        </div>
-                      </Link>
-                    ))}
+                    {stats.admins.map(admin => {
+                      const avatarUrl = admin.avatar
+                        ? (admin.avatar.startsWith('/uploads') ? `${API_ORIGIN}${admin.avatar}` : admin.avatar)
+                        : null;
+                      return (
+                        <Link key={admin.id} to={`/profile/${admin.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                          <div className="w-10 h-10 rounded-full bg-[#50ba4b] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                            {avatarUrl ? (
+                              <img src={avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+                            ) : (
+                              (admin.displayName || admin.username || '?')[0].toUpperCase()
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{admin.displayName || admin.username}</p>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Admin</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
 
                   {/* Our Moderators */}
@@ -422,17 +431,26 @@ export default function About() {
                     <>
                       <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-4">{t('about.ourModerators')}</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-                        {stats.moderators.map(mod => (
-                          <Link key={mod.id} to={`/profile/${mod.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                            <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                              {(mod.displayName || mod.username || '?')[0].toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{mod.displayName || mod.username}</p>
-                              <p className="text-[11px] text-gray-400 dark:text-gray-500">Moderator</p>
-                            </div>
-                          </Link>
-                        ))}
+                        {stats.moderators.map(mod => {
+                          const modAvatarUrl = mod.avatar
+                            ? (mod.avatar.startsWith('/uploads') ? `${API_ORIGIN}${mod.avatar}` : mod.avatar)
+                            : null;
+                          return (
+                            <Link key={mod.id} to={`/profile/${mod.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                                {modAvatarUrl ? (
+                                  <img src={modAvatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                ) : (
+                                  (mod.displayName || mod.username || '?')[0].toUpperCase()
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{mod.displayName || mod.username}</p>
+                                <p className="text-[11px] text-gray-400 dark:text-gray-500">Moderator</p>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </>
                   )}

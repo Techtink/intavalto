@@ -25,7 +25,8 @@
     "open": "apertum",
     "inProgress": "in progressu",
     "resolved": "resolutum",
-    "closed": "clausum"
+    "closed": "clausum",
+    "saving": "Servans..."
   },
   "forum": {
     "title": "Forum",
@@ -285,7 +286,15 @@
       "confirmBan": "Confirma Prohibitionem",
       "roleUpdated": "Munus renovatum",
       "userBanned": "Usor prohibitus",
-      "userUnbanned": "Usor deprohibitus"
+      "userUnbanned": "Usor deprohibitus",
+      "createUser": "+ Crea Usorem",
+      "createSuccess": "Usor cum successu creatus",
+      "username": "Nomen Usoris",
+      "usernamePlaceholder": "Insere nomen usoris",
+      "emailPlaceholder": "Insere inscriptionem electronicam",
+      "password": "Tessera",
+      "passwordPlaceholder": "Min 6 characteres",
+      "displayNamePlaceholder": "Insere nomen ostentum"
     },
     "moderation": {
       "title": "Moderatio Contentorum",
@@ -456,6 +465,11 @@
     "inTheLast7Days": "in ultimis 7 diebus",
     "today": "hodie",
     "allTime": "in totum"
+  },
+  "avatar": {
+    "cropTitle": "Seca Imaginem Profani",
+    "saveAvatar": "Serva Imaginem",
+    "uploadSuccess": "Imago cum successu renovata"
   },
   "badges": {
     "title": "Insignia",

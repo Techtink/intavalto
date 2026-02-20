@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
+import AvatarCropModal from '../components/AvatarCropModal';
+
+const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
 export default function Profile() {
   const { id } = useParams();
@@ -13,9 +16,12 @@ export default function Profile() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [editData, setEditData] = useState({ displayName: '', bio: '', avatar: '' });
+  const [editData, setEditData] = useState({ displayName: '', bio: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const { t } = useTranslation();
 
   const isOwnProfile = currentUser?.id === id;
@@ -26,7 +32,7 @@ export default function Profile() {
         setLoading(true);
         const { data } = await api.get(`/users/${id}`);
         setProfile(data);
-        setEditData({ displayName: data.displayName || '', bio: data.bio || '', avatar: data.avatar || '' });
+        setEditData({ displayName: data.displayName || '', bio: data.bio || '' });
       } catch (err) {
         console.error('Failed to load profile:', err);
       } finally {
@@ -65,6 +71,43 @@ export default function Profile() {
     }
   };
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropImageSrc(reader.result);
+    reader.readAsDataURL(file);
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleCropSave = async (blob) => {
+    setCropImageSrc(null);
+    setAvatarUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('avatar', blob, 'avatar.jpg');
+      const { data } = await api.put(`/users/${id}/avatar`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setProfile({ ...profile, avatar: data.user.avatar });
+      if (isOwnProfile) setUser({ ...currentUser, avatar: data.user.avatar });
+      setSuccess(t('avatar.uploadSuccess'));
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload avatar');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return null;
+    if (avatar.startsWith('/uploads')) return `${API_ORIGIN}${avatar}`;
+    return avatar;
+  };
+
   if (loading) return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors">{t('common.loading')}</div>;
   if (!profile) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
@@ -74,6 +117,8 @@ export default function Profile() {
       </div>
     </div>
   );
+
+  const avatarUrl = getAvatarUrl(profile.avatar);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
@@ -103,12 +148,6 @@ export default function Profile() {
                     onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows="3" placeholder={t('profile.bioPlaceholder')} />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Avatar URL</label>
-                  <input type="text" value={editData.avatar}
-                    onChange={(e) => setEditData({ ...editData, avatar: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" placeholder="https://example.com/avatar.jpg" />
-                </div>
               </div>
               <div className="flex gap-2 mt-4">
                 <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">{t('profile.saveProfile')}</button>
@@ -118,11 +157,42 @@ export default function Profile() {
           ) : (
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-6">
-                <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl font-bold text-[#50ba4b] dark:text-[#50ba4b] flex-shrink-0">
-                  {profile.avatar ? (
-                    <img src={profile.avatar} alt="" className="w-20 h-20 rounded-full object-cover" />
-                  ) : (
-                    (profile.displayName || profile.username || '?')[0].toUpperCase()
+                {/* Avatar with hover upload */}
+                <div className="relative group flex-shrink-0">
+                  <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl font-bold text-[#50ba4b] overflow-hidden">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
+                    ) : (
+                      (profile.displayName || profile.username || '?')[0].toUpperCase()
+                    )}
+                  </div>
+                  {isOwnProfile && (
+                    <>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                      />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={avatarUploading}
+                        className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      >
+                        {avatarUploading ? (
+                          <svg className="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        )}
+                      </button>
+                    </>
                   )}
                 </div>
                 <div>
@@ -168,6 +238,15 @@ export default function Profile() {
           </div>
         )}
       </div>
+
+      {/* Avatar Crop Modal */}
+      {cropImageSrc && (
+        <AvatarCropModal
+          imageSrc={cropImageSrc}
+          onCancel={() => setCropImageSrc(null)}
+          onSave={handleCropSave}
+        />
+      )}
     </div>
   );
 }

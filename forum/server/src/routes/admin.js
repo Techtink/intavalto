@@ -10,6 +10,7 @@ router.use(authenticate, adminOnly);
 
 // User Management
 router.get('/users', adminController.getAllUsers);
+router.post('/users', adminController.createUser);
 router.get('/users/:id', adminController.getUserById);
 router.put('/users/:id', adminController.updateUser);
 router.post('/users/:id/ban', adminController.banUser);

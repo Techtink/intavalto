@@ -25,7 +25,8 @@
     "open": "ouvert",
     "inProgress": "en cours",
     "resolved": "résolu",
-    "closed": "fermé"
+    "closed": "fermé",
+    "saving": "Enregistrement..."
   },
   "forum": {
     "title": "Forum",
@@ -285,7 +286,15 @@
       "confirmBan": "Confirmer le Bannissement",
       "roleUpdated": "Rôle mis à jour",
       "userBanned": "Utilisateur banni",
-      "userUnbanned": "Utilisateur débanni"
+      "userUnbanned": "Utilisateur débanni",
+      "createUser": "+ Créer un Utilisateur",
+      "createSuccess": "Utilisateur créé avec succès",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Entrez le nom d'utilisateur",
+      "emailPlaceholder": "Entrez l'e-mail",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Min 6 caractères",
+      "displayNamePlaceholder": "Entrez le nom d'affichage"
     },
     "moderation": {
       "title": "Modération du Contenu",
@@ -456,6 +465,11 @@
     "inTheLast7Days": "au cours des 7 derniers jours",
     "today": "aujourd'hui",
     "allTime": "depuis toujours"
+  },
+  "avatar": {
+    "cropTitle": "Recadrer la Photo de Profil",
+    "saveAvatar": "Enregistrer l'Avatar",
+    "uploadSuccess": "Avatar mis à jour avec succès"
   },
   "badges": {
     "title": "Badges",
