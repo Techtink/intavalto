@@ -44,6 +44,7 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/tickets', require('./routes/tickets'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

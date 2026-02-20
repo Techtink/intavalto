@@ -225,6 +225,8 @@
     "ticketNumber": "工单 #{{number}}",
     "closeTicket": "关闭工单",
     "closeConfirm": "关闭此工单？",
+    "reopenTicket": "重新打开工单",
+    "reopenConfirm": "重新打开此工单？",
     "ticketNotFound": "工单未找到",
     "backToSupportLink": "返回支持",
     "submittedBy": "提交者",
@@ -475,5 +477,10 @@
     "title": "徽章",
     "comingSoon": "徽章即将推出",
     "description": "我们正在开发徽章系统，以表彰和奖励社区贡献。敬请期待！"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "全部标记为已读",
+    "empty": "暂无通知"
   }
 }

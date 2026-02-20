@@ -74,6 +74,16 @@ export default function TicketDetail() {
     }
   };
 
+  const handleReopen = async () => {
+    if (!window.confirm(t('ticketDetail.reopenConfirm'))) return;
+    try {
+      await api.post(`/tickets/${id}/reopen`);
+      setTicket({ ...ticket, status: 'open' });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to reopen ticket');
+    }
+  };
+
   if (loading) return <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 dark:text-gray-500 transition-colors">{t('common.loading')}</div>;
   if (!ticket) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
@@ -95,9 +105,14 @@ export default function TicketDetail() {
             <Link to="/support" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm">&larr; {t('ticketDetail.backToSupport')}</Link>
             <span className="text-sm text-gray-400 dark:text-gray-500">{t('ticketDetail.ticketNumber', { number: ticket.ticketNumber })}</span>
           </div>
-          {ticket.status !== 'closed' && (isOwner || isStaff) && (
+          {ticket.status !== 'closed' && isStaff && (
             <button onClick={handleClose} className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 border border-gray-300 dark:border-gray-600 px-3 py-1 rounded">
               {t('ticketDetail.closeTicket')}
+            </button>
+          )}
+          {ticket.status === 'closed' && (isOwner || isStaff) && (
+            <button onClick={handleReopen} className="text-sm text-gray-500 dark:text-gray-400 hover:text-[#50ba4b] border border-gray-300 dark:border-gray-600 px-3 py-1 rounded">
+              {t('ticketDetail.reopenTicket')}
             </button>
           )}
         </div>

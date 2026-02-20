@@ -5,6 +5,7 @@ const { handleValidationErrors } = require('../middleware/validation');
 const { Ticket, TicketReply, User } = require('../models');
 const logger = require('../utils/logger');
 const { uploadTicketAttachment } = require('../middleware/upload');
+const { createTicketReplyNotification } = require('../utils/notificationHelper');
 
 const router = express.Router();
 
@@ -136,6 +137,9 @@ router.post('/:id/replies', authenticate, uploadTicketAttachment.array('attachme
       include: [{ model: User, attributes: ['id', 'username', 'displayName', 'avatar', 'role'] }],
     });
 
+    // Create notifications for ticket reply
+    await createTicketReplyNotification(ticket, reply, req.user);
+
     res.status(201).json({ message: 'Reply added', reply: replyWithUser });
   } catch (error) {
     logger.error('Error adding ticket reply', error);
@@ -143,14 +147,14 @@ router.post('/:id/replies', authenticate, uploadTicketAttachment.array('attachme
   }
 });
 
-// Close ticket (owner only)
+// Close ticket (staff only)
 router.post('/:id/close', authenticate, async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    if (ticket.userId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
+    if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
+      return res.status(403).json({ message: 'Only staff can close tickets' });
     }
 
     ticket.status = 'closed';
@@ -160,6 +164,30 @@ router.post('/:id/close', authenticate, async (req, res) => {
   } catch (error) {
     logger.error('Error closing ticket', error);
     res.status(500).json({ message: 'Failed to close ticket' });
+  }
+});
+
+// Reopen ticket (owner or staff)
+router.post('/:id/reopen', authenticate, async (req, res) => {
+  try {
+    const ticket = await Ticket.findByPk(req.params.id);
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    if (ticket.status !== 'closed') {
+      return res.status(400).json({ message: 'Ticket is not closed' });
+    }
+
+    if (ticket.userId !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'moderator') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    ticket.status = 'open';
+    await ticket.save();
+
+    res.json({ message: 'Ticket reopened', ticket });
+  } catch (error) {
+    logger.error('Error reopening ticket', error);
+    res.status(500).json({ message: 'Failed to reopen ticket' });
   }
 });
 

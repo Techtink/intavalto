@@ -9,6 +9,29 @@ const logger = require('../utils/logger');
 
 const router = express.Router();
 
+// Helper: fetch recent unique commenters for a list of posts
+const getRecentCommenters = async (postIds, limit = 5) => {
+  if (!postIds.length) return {};
+  const { sequelize } = require('../models');
+  const [rows] = await sequelize.query(`
+    SELECT DISTINCT ON (c."postId", c."userId")
+      c."postId", u.id, u.username, u.avatar
+    FROM "Comments" c
+    JOIN "Users" u ON u.id = c."userId"
+    WHERE c."postId" IN (:postIds)
+    ORDER BY c."postId", c."userId", c."createdAt" DESC
+  `, { replacements: { postIds } });
+
+  const grouped = {};
+  postIds.forEach(id => { grouped[id] = []; });
+  rows.forEach(r => {
+    if (grouped[r.postId] && grouped[r.postId].length < limit) {
+      grouped[r.postId].push({ id: r.id, username: r.username, avatar: r.avatar });
+    }
+  });
+  return grouped;
+};
+
 const generateSlug = (title) => {
   const base = title
     .toLowerCase()
@@ -19,6 +42,31 @@ const generateSlug = (title) => {
   const suffix = crypto.randomBytes(4).toString('hex');
   return `${base}-${suffix}`;
 };
+
+// Get all unique tags with counts
+router.get('/tags', async (req, res) => {
+  try {
+    const { productId, categoryId } = req.query;
+    const where = { isApproved: true };
+    if (productId) where.productId = productId;
+    if (categoryId) where.categoryId = categoryId;
+
+    const posts = await Post.findAll({ where, attributes: ['tags'] });
+    const tagCounts = {};
+    posts.forEach(p => (p.tags || []).forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    }));
+
+    const tags = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+
+    res.json(tags);
+  } catch (error) {
+    logger.error('Error fetching tags', error);
+    res.status(500).json({ message: 'Failed to fetch tags' });
+  }
+});
 
 // Search posts
 router.get('/search', async (req, res) => {
@@ -50,8 +98,16 @@ router.get('/search', async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
+    const postIds = posts.rows.map(p => p.id);
+    const participants = await getRecentCommenters(postIds);
+    const postsWithParticipants = posts.rows.map(p => {
+      const d = p.toJSON();
+      d.participants = participants[p.id] || [];
+      return d;
+    });
+
     res.json({
-      posts: posts.rows,
+      posts: postsWithParticipants,
       total: posts.count,
       pages: Math.ceil(posts.count / parsedLimit),
     });
@@ -64,10 +120,11 @@ router.get('/search', async (req, res) => {
 // List posts
 router.get('/', async (req, res) => {
   try {
-    const { productId, categoryId, page = 1, limit = 10, sort = 'newest' } = req.query;
+    const { productId, categoryId, tag, page = 1, limit = 10, sort = 'newest' } = req.query;
     const where = { isApproved: true };
     if (productId) where.productId = productId;
     if (categoryId) where.categoryId = categoryId;
+    if (tag) where.tags = { [Op.contains]: [tag] };
 
     const parsedLimit = Math.min(Math.max(parseInt(limit) || 10, 1), 50);
     const parsedPage = Math.max(parseInt(page) || 1, 1);
@@ -102,8 +159,16 @@ router.get('/', async (req, res) => {
 
     const count = await Post.count({ where });
 
+    const postIds = posts.rows.map(p => p.id);
+    const participants = await getRecentCommenters(postIds);
+    const postsWithParticipants = posts.rows.map(p => {
+      const d = p.toJSON();
+      d.participants = participants[p.id] || [];
+      return d;
+    });
+
     res.json({
-      posts: posts.rows,
+      posts: postsWithParticipants,
       total: count,
       pages: Math.ceil(count / parsedLimit)
     });

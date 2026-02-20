@@ -8,7 +8,32 @@ const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
+const { Op } = require('sequelize');
+
 const router = express.Router();
+
+// Search users (for @mentions autocomplete)
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json([]);
+
+    const users = await User.findAll({
+      where: {
+        username: { [Op.iLike]: `${q}%` },
+        isActive: true,
+        isBanned: false,
+      },
+      attributes: ['id', 'username', 'displayName', 'avatar'],
+      limit: 10,
+      order: [['username', 'ASC']],
+    });
+    res.json(users);
+  } catch (error) {
+    logger.error('Error searching users', error);
+    res.status(500).json({ message: 'Failed to search users' });
+  }
+});
 
 const validateProfileUpdate = [
   body('displayName')

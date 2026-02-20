@@ -225,6 +225,8 @@
     "ticketNumber": "Ticket #{{number}}",
     "closeTicket": "Fermer le Ticket",
     "closeConfirm": "Fermer ce ticket ?",
+    "reopenTicket": "Rouvrir le Ticket",
+    "reopenConfirm": "Rouvrir ce ticket ?",
     "ticketNotFound": "Ticket non trouvé",
     "backToSupportLink": "Retour au Support",
     "submittedBy": "Soumis par",
@@ -475,5 +477,10 @@
     "title": "Badges",
     "comingSoon": "Badges Bientôt Disponibles",
     "description": "Nous travaillons sur un système de badges pour reconnaître et récompenser les contributions de la communauté. Restez à l'écoute !"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "empty": "Aucune notification"
   }
 }

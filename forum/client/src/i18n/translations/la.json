@@ -234,7 +234,9 @@
     "staff": "Personale",
     "replyPlaceholder": "Scribe responsum tuum...",
     "sendReply": "Mitte Responsum",
-    "ticketClosed": "Haec tessera clausa est. Si plus auxilii eges, quaeso novam tesseram submitte."
+    "ticketClosed": "Haec tessera clausa est. Si plus auxilii eges, quaeso novam tesseram submitte.",
+    "reopenTicket": "Tesseram Reaperi",
+    "reopenConfirm": "Tesseram reaperis?"
   },
   "admin": {
     "title": "Administratio Fori",
@@ -475,5 +477,10 @@
     "title": "Insignia",
     "comingSoon": "Insignia Mox Venient",
     "description": "Systema insignium laboramus ad contributiones communitatis agnoscendas et remunerandas. Manete!"
+  },
+  "notifications": {
+    "title": "Notificationes",
+    "markAllRead": "Omnia lecta signa",
+    "empty": "Nullae notificationes"
   }
 }

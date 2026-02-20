@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
+import MentionTextarea from '../components/MentionTextarea';
+import MentionText from '../components/MentionText';
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -148,8 +150,8 @@ export default function PostDetail() {
             <form onSubmit={handleUpdatePost}>
               <input type="text" value={editPost.title} onChange={(e) => setEditPost({ ...editPost, title: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 text-xl font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" required />
-              <textarea value={editPost.content} onChange={(e) => setEditPost({ ...editPost, content: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows="8" required />
+              <MentionTextarea value={editPost.content} onChange={(val) => setEditPost({ ...editPost, content: val })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={8} required />
               <input type="text" value={editPost.tags} onChange={(e) => setEditPost({ ...editPost, tags: e.target.value })}
                 placeholder={t('postDetail.tagsPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
               <div className="flex gap-2">
@@ -201,7 +203,7 @@ export default function PostDetail() {
                 ))}
               </div>
 
-              <div className="prose prose-sm dark:prose-invert max-w-none mb-6 whitespace-pre-wrap text-gray-900 dark:text-gray-200">{post.content}</div>
+              <div className="prose prose-sm dark:prose-invert max-w-none mb-6 whitespace-pre-wrap text-gray-900 dark:text-gray-200"><MentionText>{post.content}</MentionText></div>
 
               <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button onClick={handleLike} className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors">
@@ -219,9 +221,9 @@ export default function PostDetail() {
 
           {user && !post.isLocked && (
             <form onSubmit={handleAddComment} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow transition-colors">
-              <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)}
+              <MentionTextarea value={newComment} onChange={setNewComment}
                 placeholder={t('postDetail.commentPlaceholder')} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
-                rows="3" required />
+                rows={3} required />
               <button type="submit" className="bg-[#50ba4b] text-white px-4 py-2 rounded-lg hover:bg-[#45a340] text-sm">{t('postDetail.postComment')}</button>
             </form>
           )}
@@ -259,15 +261,15 @@ export default function PostDetail() {
                 </div>
                 {editingCommentId === comment.id ? (
                   <div>
-                    <textarea value={editCommentContent} onChange={(e) => setEditCommentContent(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows="3" />
+                    <MentionTextarea value={editCommentContent} onChange={setEditCommentContent}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" rows={3} />
                     <div className="flex gap-2">
                       <button onClick={() => handleUpdateComment(comment.id)} className="bg-[#50ba4b] text-white px-3 py-1 rounded text-xs hover:bg-[#45a340]">{t('common.save')}</button>
                       <button onClick={() => setEditingCommentId(null)} className="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1 rounded text-xs hover:bg-gray-300 dark:hover:bg-gray-500">{t('common.cancel')}</button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">{comment.content}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap"><MentionText>{comment.content}</MentionText></p>
                 )}
               </div>
             ))

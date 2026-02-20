@@ -47,6 +47,7 @@ db.Moderator = require('./Moderator')(sequelize, DataTypes);
 db.Ticket = require('./Ticket')(sequelize, DataTypes);
 db.TicketReply = require('./TicketReply')(sequelize, DataTypes);
 db.SiteSettings = require('./SiteSettings')(sequelize, DataTypes);
+db.Notification = require('./Notification')(sequelize, DataTypes);
 
 // Associations
 db.User.hasMany(db.Post, { foreignKey: 'userId', onDelete: 'CASCADE' });
@@ -79,6 +80,9 @@ db.TicketReply.belongsTo(db.Ticket, { foreignKey: 'ticketId' });
 
 db.User.hasMany(db.TicketReply, { foreignKey: 'userId', onDelete: 'CASCADE' });
 db.TicketReply.belongsTo(db.User, { foreignKey: 'userId' });
+
+db.User.hasMany(db.Notification, { foreignKey: 'userId', onDelete: 'CASCADE' });
+db.Notification.belongsTo(db.User, { foreignKey: 'userId' });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

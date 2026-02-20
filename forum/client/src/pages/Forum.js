@@ -4,6 +4,8 @@ import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
+import MentionTextarea from '../components/MentionTextarea';
+import NotificationBell from '../components/NotificationBell';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
@@ -67,6 +69,7 @@ export default function Forum() {
         const params = new URLSearchParams({ page: loadPage, limit: 15, sort });
         if (selectedProduct) params.append('productId', selectedProduct);
         if (selectedCategory) params.append('categoryId', selectedCategory);
+        if (selectedTag) params.append('tag', selectedTag);
         const res = await api.get(`/posts?${params}`);
         data = res.data;
       }
@@ -77,19 +80,13 @@ export default function Forum() {
       }
       setTotalPages(data.pages);
       setHasMore(loadPage < data.pages);
-      const tags = new Set();
-      data.posts.forEach(p => (p.tags || []).forEach(t => tags.add(t)));
-      setAllTags(prev => {
-        const merged = new Set([...prev, ...tags]);
-        return Array.from(merged).sort();
-      });
     } catch (error) {
       console.error('Failed to load posts:', error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [selectedProduct, selectedCategory, sort, isSearching, searchQuery]);
+  }, [selectedProduct, selectedCategory, selectedTag, sort, isSearching, searchQuery]);
 
   // Initial load and filter/search changes
   useEffect(() => {
@@ -97,6 +94,21 @@ export default function Forum() {
     setHasMore(true);
     fetchPosts(1, false);
   }, [fetchPosts]);
+
+  // Fetch tags from server
+  const fetchTags = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedProduct) params.append('productId', selectedProduct);
+      if (selectedCategory) params.append('categoryId', selectedCategory);
+      const { data } = await api.get(`/posts/tags?${params}`);
+      setAllTags(data.map(t => t.tag));
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+    }
+  }, [selectedProduct, selectedCategory]);
+
+  useEffect(() => { fetchTags(); }, [fetchTags]);
 
   // Intersection observer for infinite scroll
   useEffect(() => {
@@ -242,6 +254,9 @@ export default function Forum() {
   const selectTag = (tag) => {
     setSelectedTag(tag);
     setShowTagDropdown(false);
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
   };
 
   const acceptCookies = () => {
@@ -270,10 +285,6 @@ export default function Forum() {
     if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
     return String(n);
   };
-
-  const filteredPosts = selectedTag
-    ? posts.filter(p => (p.tags || []).includes(selectedTag))
-    : posts;
 
   return (
     <div className="min-h-screen bg-[#eee] dark:bg-gray-900 transition-colors duration-200">
@@ -345,6 +356,9 @@ export default function Forum() {
 
             {/* Language selector */}
             <LanguageSelector />
+
+            {/* Notifications */}
+            <NotificationBell />
 
             {/* User / Login */}
             {user ? (
@@ -748,9 +762,9 @@ export default function Forum() {
                   </span>
                   <span className={`text-[11px] ${newPost.title.length > 0 && newPost.title.length < 5 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>{newPost.title.length}/5 min</span>
                 </div>
-                <textarea placeholder={t('forum.newPost.contentPlaceholder')} value={newPost.content}
-                  onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${newPost.content.length > 0 && newPost.content.length < 20 ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 dark:border-gray-600 focus:ring-[#50ba4b]'}`} rows="5" required />
+                <MentionTextarea placeholder={t('forum.newPost.contentPlaceholder')} value={newPost.content}
+                  onChange={(val) => setNewPost({ ...newPost, content: val })}
+                  className={`w-full px-3 py-2 border rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${newPost.content.length > 0 && newPost.content.length < 20 ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 dark:border-gray-600 focus:ring-[#50ba4b]'}`} rows={5} required />
                 <div className="flex justify-between mb-2.5 mt-0.5">
                   <span className={`text-[11px] ${newPost.content.length > 0 && newPost.content.length < 20 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                     {newPost.content.length > 0 && newPost.content.length < 20 ? t('forum.newPost.contentTooShort') : ''}
@@ -784,7 +798,7 @@ export default function Forum() {
           <div className="mx-4 lg:mx-5 mt-2">
             {loading ? (
               <div className="text-center py-16 text-gray-400 dark:text-gray-500 text-[13px]">{t('common.loading')}</div>
-            ) : filteredPosts.length === 0 ? (
+            ) : posts.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center transition-colors">
                 <p className="text-gray-400 dark:text-gray-500 text-[13px]">
                   {isSearching ? t('forum.empty.noSearchResults') : selectedTag ? t('forum.empty.noTagResults') : t('forum.empty.noTopics')}
@@ -802,7 +816,7 @@ export default function Forum() {
 
                 {/* Topic rows */}
                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                  {filteredPosts.map(post => (
+                  {posts.map(post => (
                     <Link key={post.id} to={`/posts/${post.id}`}
                       className="grid grid-cols-1 md:grid-cols-[1fr_80px_80px_80px] gap-0 px-4 py-3.5 hover:bg-[#fafafa] dark:hover:bg-gray-700/50 transition-colors items-start group">
                       {/* Topic column */}
@@ -849,13 +863,33 @@ export default function Forum() {
                               )}
                             </p>
 
-                            {/* Author avatars */}
+                            {/* Participant avatars */}
                             <div className="flex items-center gap-2 mt-[8px]">
                               <div className="flex -space-x-1.5">
-                                <div className="w-[24px] h-[24px] rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-white dark:ring-gray-800"
-                                  title={post.User?.username}>
-                                  {(post.User?.username || '?')[0].toUpperCase()}
-                                </div>
+                                {(() => {
+                                  const uniqueParticipants = (post.participants || []).filter(p => p.id !== post.User?.id);
+                                  const allUsers = [post.User, ...uniqueParticipants].filter(Boolean).slice(0, 5);
+                                  const remaining = Math.max(0, (post.participants || []).length + 1 - allUsers.length);
+                                  return (
+                                    <>
+                                      {allUsers.map(u => (
+                                        <div key={u.id} className="w-[24px] h-[24px] rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-white dark:ring-gray-800 overflow-hidden"
+                                          title={u.username}>
+                                          {u.avatar ? (
+                                            <img src={`${API_ORIGIN}${u.avatar}`} alt={u.username} className="w-full h-full object-cover" />
+                                          ) : (
+                                            (u.username || '?')[0].toUpperCase()
+                                          )}
+                                        </div>
+                                      ))}
+                                      {remaining > 0 && (
+                                        <div className="w-[24px] h-[24px] rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-[9px] font-bold ring-2 ring-white dark:ring-gray-800">
+                                          +{remaining}
+                                        </div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </div>
                             </div>
                           </div>
@@ -897,7 +931,7 @@ export default function Forum() {
                 <span className="text-[13px] text-gray-400 dark:text-gray-500">{t('forum.loadMore')}</span>
               </div>
             )}
-            {!hasMore && filteredPosts.length > 0 && (
+            {!hasMore && posts.length > 0 && (
               <div className="flex justify-center py-6">
                 <span className="text-[13px] text-gray-400 dark:text-gray-500">{t('forum.endReached')}</span>
               </div>

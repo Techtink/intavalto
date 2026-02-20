@@ -234,7 +234,9 @@
     "staff": "Mitarbeiter",
     "replyPlaceholder": "Schreiben Sie Ihre Antwort...",
     "sendReply": "Antwort Senden",
-    "ticketClosed": "Dieses Ticket ist geschlossen. Wenn Sie weitere Hilfe benötigen, reichen Sie bitte ein neues Ticket ein."
+    "ticketClosed": "Dieses Ticket ist geschlossen. Wenn Sie weitere Hilfe benötigen, reichen Sie bitte ein neues Ticket ein.",
+    "reopenTicket": "Ticket erneut öffnen",
+    "reopenConfirm": "Dieses Ticket erneut öffnen?"
   },
   "admin": {
     "title": "Forum-Administration",
@@ -475,5 +477,10 @@
     "title": "Abzeichen",
     "comingSoon": "Abzeichen Kommen Bald",
     "description": "Wir arbeiten an einem Abzeichen-System, um Community-Beiträge anzuerkennen und zu belohnen. Bleiben Sie dran!"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "empty": "Keine Benachrichtigungen"
   }
 }
