@@ -44,6 +44,8 @@
       "products": "Producta",
       "allProducts": "Omnia producta",
       "tags": "Signa",
+      "about": "De Nobis",
+      "badges": "Insignia",
       "adminPanel": "Tabula Administrationis"
     },
     "header": {
@@ -419,5 +421,31 @@
       "saveSmsSettings": "Serva Configurationes SMS",
       "smsSaved": "Configurationes SMS cum successu servatae"
     }
+  },
+  "about": {
+    "title": "De Nobis",
+    "forumName": "Forum Intavalto",
+    "forumDescription": "Platforma communitatis ad disputationes, auxilium, et collaborationem.",
+    "members": "Membra",
+    "admins": "Administratores",
+    "moderators": "Moderatores",
+    "created": "Creatum",
+    "ourAdmins": "Administratores Nostri",
+    "ourModerators": "Moderatores Nostri",
+    "contactUs": "Contacta Nos",
+    "contactDescription": "Auxilium eges vel quaestionem habes? Turma auxilii nostri tibi adest.",
+    "openTicket": "Aperi Tesseram Auxilii",
+    "siteActivity": "Activitas Situs",
+    "topicsThisWeek": "Themata Hac Hebdomade",
+    "postsToday": "Scripta Hodie",
+    "newMembersThisWeek": "Nova Membra Hac Hebdomade",
+    "totalReplies": "Responsa Totalia",
+    "totalTopics": "Themata Totalia",
+    "loadFailed": "Informationes onerare non potuit."
+  },
+  "badges": {
+    "title": "Insignia",
+    "comingSoon": "Insignia Mox Venient",
+    "description": "Systema insignium laboramus ad contributiones communitatis agnoscendas et remunerandas. Manete!"
   }
 }

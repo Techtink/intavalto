@@ -44,6 +44,8 @@
       "products": "Produits",
       "allProducts": "Tous les produits",
       "tags": "Étiquettes",
+      "about": "À propos",
+      "badges": "Badges",
       "adminPanel": "Panneau Admin"
     },
     "header": {
@@ -419,5 +421,31 @@
       "saveSmsSettings": "Enregistrer les paramètres SMS",
       "smsSaved": "Paramètres SMS enregistrés avec succès"
     }
+  },
+  "about": {
+    "title": "À propos",
+    "forumName": "Forum Intavalto",
+    "forumDescription": "Une plateforme communautaire pour les discussions, le support et la collaboration.",
+    "members": "Membres",
+    "admins": "Admins",
+    "moderators": "Modérateurs",
+    "created": "Créé",
+    "ourAdmins": "Nos Administrateurs",
+    "ourModerators": "Nos Modérateurs",
+    "contactUs": "Contactez-nous",
+    "contactDescription": "Besoin d'aide ou avez-vous une question ? Notre équipe de support est là pour vous.",
+    "openTicket": "Ouvrir un Ticket de Support",
+    "siteActivity": "Activité du Site",
+    "topicsThisWeek": "Sujets Cette Semaine",
+    "postsToday": "Publications Aujourd'hui",
+    "newMembersThisWeek": "Nouveaux Membres Cette Semaine",
+    "totalReplies": "Réponses Totales",
+    "totalTopics": "Sujets Totaux",
+    "loadFailed": "Échec du chargement des informations."
+  },
+  "badges": {
+    "title": "Badges",
+    "comingSoon": "Badges Bientôt Disponibles",
+    "description": "Nous travaillons sur un système de badges pour reconnaître et récompenser les contributions de la communauté. Restez à l'écoute !"
   }
 }

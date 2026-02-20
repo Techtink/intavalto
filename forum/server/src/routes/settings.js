@@ -1,5 +1,6 @@
 const express = require('express');
-const { SiteSettings } = require('../models');
+const { SiteSettings, User, Post, Comment } = require('../models');
+const { Op } = require('sequelize');
 const router = express.Router();
 
 // Public endpoint — returns banner data (no auth required)
@@ -38,6 +39,50 @@ router.get('/logo', async (req, res) => {
     res.json({ logoUrl: settings?.logoUrl || null });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch logo' });
+  }
+});
+
+// Public endpoint — returns forum stats for About page (no auth required)
+router.get('/about', async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const [
+      totalMembers,
+      totalPosts,
+      totalComments,
+      admins,
+      moderators,
+      postsThisWeek,
+      postsToday,
+      newMembersThisWeek,
+      settings,
+    ] = await Promise.all([
+      User.count(),
+      Post.count(),
+      Comment.count(),
+      User.findAll({ where: { role: 'admin' }, attributes: ['id', 'username', 'displayName', 'avatar', 'createdAt'] }),
+      User.findAll({ where: { role: 'moderator' }, attributes: ['id', 'username', 'displayName', 'avatar', 'createdAt'] }),
+      Post.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
+      Post.count({ where: { createdAt: { [Op.gte]: oneDayAgo } } }),
+      User.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
+      SiteSettings.findOne({ attributes: ['createdAt'] }),
+    ]);
+
+    res.json({
+      totalMembers,
+      totalPosts,
+      totalComments,
+      admins,
+      moderators,
+      postsThisWeek,
+      postsToday,
+      newMembersThisWeek,
+      forumCreatedAt: settings?.createdAt || null,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch about stats' });
   }
 });
 

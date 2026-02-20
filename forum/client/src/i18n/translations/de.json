@@ -44,6 +44,8 @@
       "products": "Produkte",
       "allProducts": "Alle Produkte",
       "tags": "Tags",
+      "about": "Über uns",
+      "badges": "Abzeichen",
       "adminPanel": "Admin-Bereich"
     },
     "header": {
@@ -419,5 +421,31 @@
       "saveSmsSettings": "SMS-Einstellungen speichern",
       "smsSaved": "SMS-Einstellungen erfolgreich gespeichert"
     }
+  },
+  "about": {
+    "title": "Über uns",
+    "forumName": "Intavalto Forum",
+    "forumDescription": "Eine Community-Plattform für Diskussionen, Support und Zusammenarbeit.",
+    "members": "Mitglieder",
+    "admins": "Admins",
+    "moderators": "Moderatoren",
+    "created": "Erstellt",
+    "ourAdmins": "Unsere Administratoren",
+    "ourModerators": "Unsere Moderatoren",
+    "contactUs": "Kontaktieren Sie uns",
+    "contactDescription": "Brauchen Sie Hilfe oder haben Sie eine Frage? Unser Support-Team ist für Sie da.",
+    "openTicket": "Support-Ticket Eröffnen",
+    "siteActivity": "Website-Aktivität",
+    "topicsThisWeek": "Themen Diese Woche",
+    "postsToday": "Beiträge Heute",
+    "newMembersThisWeek": "Neue Mitglieder Diese Woche",
+    "totalReplies": "Antworten Gesamt",
+    "totalTopics": "Themen Gesamt",
+    "loadFailed": "Fehler beim Laden der Informationen."
+  },
+  "badges": {
+    "title": "Abzeichen",
+    "comingSoon": "Abzeichen Kommen Bald",
+    "description": "Wir arbeiten an einem Abzeichen-System, um Community-Beiträge anzuerkennen und zu belohnen. Bleiben Sie dran!"
   }
 }

@@ -7,6 +7,8 @@ import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
 import TicketDetail from './pages/TicketDetail';
+import About from './pages/About';
+import Badges from './pages/Badges';
 import AdminLayout from './pages/AdminLayout';
 import useAuthStore from './store/authStore';
 import api from './utils/api';
@@ -42,6 +44,8 @@ function App() {
         <Route path="/forum" element={<Forum />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/profile/:id" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/badges" element={<Badges />} />
         <Route path="/support" element={<Support />} />
         <Route path="/support/:id" element={isAuthenticated ? <TicketDetail /> : <Navigate to="/login" />} />
         <Route

@@ -44,6 +44,8 @@
       "products": "Products",
       "allProducts": "All products",
       "tags": "Tags",
+      "about": "About",
+      "badges": "Badges",
       "adminPanel": "Admin Panel"
     },
     "header": {
@@ -419,5 +421,31 @@
       "saveSmsSettings": "Save SMS Settings",
       "smsSaved": "SMS settings saved successfully"
     }
+  },
+  "about": {
+    "title": "About",
+    "forumName": "Intavalto Forum",
+    "forumDescription": "A community platform for discussions, support, and collaboration.",
+    "members": "Members",
+    "admins": "Admins",
+    "moderators": "Moderators",
+    "created": "Created",
+    "ourAdmins": "Our Admins",
+    "ourModerators": "Our Moderators",
+    "contactUs": "Contact Us",
+    "contactDescription": "Need help or have a question? Our support team is here for you.",
+    "openTicket": "Open a Support Ticket",
+    "siteActivity": "Site Activity",
+    "topicsThisWeek": "Topics This Week",
+    "postsToday": "Posts Today",
+    "newMembersThisWeek": "New Members This Week",
+    "totalReplies": "Total Replies",
+    "totalTopics": "Total Topics",
+    "loadFailed": "Failed to load about information."
+  },
+  "badges": {
+    "title": "Badges",
+    "comingSoon": "Badges Coming Soon",
+    "description": "We're working on a badge system to recognize and reward community contributions. Stay tuned!"
   }
 }

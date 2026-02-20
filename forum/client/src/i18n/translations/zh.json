@@ -44,6 +44,8 @@
       "products": "产品",
       "allProducts": "所有产品",
       "tags": "标签",
+      "about": "关于",
+      "badges": "徽章",
       "adminPanel": "管理面板"
     },
     "header": {
@@ -419,5 +421,31 @@
       "saveSmsSettings": "保存短信设置",
       "smsSaved": "短信设置保存成功"
     }
+  },
+  "about": {
+    "title": "关于",
+    "forumName": "Intavalto 论坛",
+    "forumDescription": "一个用于讨论、支持和协作的社区平台。",
+    "members": "成员",
+    "admins": "管理员",
+    "moderators": "版主",
+    "created": "创建时间",
+    "ourAdmins": "我们的管理员",
+    "ourModerators": "我们的版主",
+    "contactUs": "联系我们",
+    "contactDescription": "需要帮助或有问题？我们的支持团队随时为您服务。",
+    "openTicket": "提交支持工单",
+    "siteActivity": "站点活动",
+    "topicsThisWeek": "本周话题",
+    "postsToday": "今日帖子",
+    "newMembersThisWeek": "本周新成员",
+    "totalReplies": "总回复数",
+    "totalTopics": "总话题数",
+    "loadFailed": "加载信息失败。"
+  },
+  "badges": {
+    "title": "徽章",
+    "comingSoon": "徽章即将推出",
+    "description": "我们正在开发徽章系统，以表彰和奖励社区贡献。敬请期待！"
   }
 }
