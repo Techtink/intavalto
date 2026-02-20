@@ -32,6 +32,7 @@ export default function Forum() {
   const [allTags, setAllTags] = useState([]);
   const [banner, setBanner] = useState(null);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [cookieAccepted, setCookieAccepted] = useState(() => localStorage.getItem('cookieConsent') === 'true');
   const [cookieDismissing, setCookieDismissing] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
@@ -390,20 +391,28 @@ export default function Forum() {
                 </svg>
                 {t('forum.sidebar.topics')}
               </button>
-              <Link to="/about" onClick={() => setSidebarOpen(false)}
+              <button onClick={() => setMoreOpen(!moreOpen)}
                 className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
                 </svg>
-                {t('forum.sidebar.about')}
-              </Link>
-              <Link to="/badges" onClick={() => setSidebarOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.003 6.003 0 01-2.27.853m0 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 10.58a6.003 6.003 0 01-2.27-.853" />
+                {t('forum.sidebar.more')}
+                <svg className={`w-3 h-3 ml-auto text-gray-400 transition-transform ${moreOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-                {t('forum.sidebar.badges')}
-              </Link>
+              </button>
+              {moreOpen && (
+                <>
+                  <Link to="/about" onClick={() => setSidebarOpen(false)}
+                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                    {t('forum.sidebar.about')}
+                  </Link>
+                  <Link to="/badges" onClick={() => setSidebarOpen(false)}
+                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                    {t('forum.sidebar.badges')}
+                  </Link>
+                </>
+              )}
             </nav>
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
