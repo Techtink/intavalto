@@ -404,6 +404,28 @@ const updateSmsSettings = async (req, res) => {
   }
 };
 
+const updateAboutSettings = async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+
+    const { aboutForumName, aboutForumDescription, aboutContactText, aboutContactEmail } = req.body;
+
+    if (aboutForumName !== undefined) settings.aboutForumName = aboutForumName;
+    if (aboutForumDescription !== undefined) settings.aboutForumDescription = aboutForumDescription;
+    if (aboutContactText !== undefined) settings.aboutContactText = aboutContactText;
+    if (aboutContactEmail !== undefined) settings.aboutContactEmail = aboutContactEmail;
+
+    await settings.save();
+    res.json({ message: 'About settings updated', settings });
+  } catch (error) {
+    logger.error('Error updating about settings', error);
+    res.status(500).json({ message: 'Failed to update about settings' });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -422,4 +444,5 @@ module.exports = {
   updateLogo,
   updateEmailSettings,
   updateSmsSettings,
+  updateAboutSettings,
 };

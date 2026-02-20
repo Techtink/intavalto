@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
@@ -14,11 +14,13 @@ export default function About() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(true);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [banner, setBanner] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const moreDropdownRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
@@ -26,18 +28,28 @@ export default function About() {
   }, [darkMode]);
 
   useEffect(() => {
+    const handleClick = (e) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target)) setMoreOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const [aboutRes, catRes, prodRes, logoRes] = await Promise.all([
+        const [aboutRes, catRes, prodRes, logoRes, bannerRes] = await Promise.all([
           api.get('/settings/about'),
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/products').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
+          api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setStats(aboutRes.data);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
         setProducts(Array.isArray(prodRes.data) ? prodRes.data : prodRes.data?.products || []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load about data:', err);
       } finally {
@@ -56,8 +68,19 @@ export default function About() {
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
+    if (!dateStr) return '';
+    const now = new Date();
+    const created = new Date(dateStr);
+    const diffMs = now - created;
+    const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
+    if (months < 1) return 'less than a month ago';
+    if (months === 1) return '1 month ago';
+    if (months < 12) return `${months} months ago`;
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    if (years === 1 && remainingMonths === 0) return '1 year ago';
+    if (remainingMonths === 0) return `${years} years ago`;
+    return `${years} year${years > 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} ago`;
   };
 
   return (
@@ -135,28 +158,42 @@ export default function About() {
                 </svg>
                 {t('forum.sidebar.topics')}
               </Link>
-              <button onClick={() => setMoreOpen(!moreOpen)}
+              {/* About - highlighted as active */}
+              <Link to="/about"
                 className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] font-medium bg-gray-200/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                  <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                <svg className="w-[16px] h-[16px] text-[#50ba4b]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {t('forum.sidebar.more')}
-                <svg className={`w-3 h-3 ml-auto text-gray-400 transition-transform ${moreOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              {moreOpen && (
-                <>
-                  <Link to="/about" onClick={() => setSidebarOpen(false)}
-                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] font-medium bg-gray-200/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors">
-                    {t('forum.sidebar.about')}
-                  </Link>
-                  <Link to="/badges" onClick={() => setSidebarOpen(false)}
-                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                    {t('forum.sidebar.badges')}
-                  </Link>
-                </>
-              )}
+                {t('forum.sidebar.about')}
+              </Link>
+              {/* More - popup dropdown */}
+              <div className="relative" ref={moreDropdownRef}>
+                <button onClick={() => setMoreOpen(!moreOpen)}
+                  className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                  <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                  </svg>
+                  {t('forum.sidebar.more')}
+                </button>
+                {moreOpen && (
+                  <div className="absolute left-0 top-full mt-1 w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 py-1">
+                    <Link to="/about" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
+                      className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-[#50ba4b] font-medium bg-green-50 dark:bg-green-900/20 transition-colors">
+                      <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {t('forum.sidebar.about')}
+                    </Link>
+                    <Link to="/badges" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
+                      className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      {t('forum.sidebar.badges')}
+                    </Link>
+                  </div>
+                )}
+              </div>
             </nav>
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
@@ -185,6 +222,27 @@ export default function About() {
                 </svg>
                 {t('forum.sidebar.shop')}
               </a>
+              <a href="#" onClick={(e) => e.preventDefault()}
+                className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c0 1.657-4.03 3-9 3s-9-1.343-9-3m18 0c0-1.657-4.03-3-9-3s-9 1.343-9 3m9-9v18" />
+                </svg>
+                {t('forum.sidebar.exploreMore')}
+              </a>
+            </div>
+
+            <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
+
+            {/* DOCUMENTATION */}
+            <div className="mb-2">
+              <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.documentation')}</h4>
+              <a href="#" onClick={(e) => e.preventDefault()}
+                className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {t('forum.sidebar.documentation')}
+              </a>
             </div>
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
@@ -202,28 +260,22 @@ export default function About() {
                       </Link>
                     </li>
                   ))}
+                  <li>
+                    <Link to="/forum"
+                      className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
+                      {t('forum.sidebar.allCategories')}
+                    </Link>
+                  </li>
                 </ul>
               </div>
             )}
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
 
-            {/* PRODUCTS */}
-            {products.length > 0 && (
-              <div className="mb-2">
-                <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.products')}</h4>
-                <ul className="space-y-[1px]">
-                  {products.map(prod => (
-                    <li key={prod.id}>
-                      <Link to="/forum" className="w-full flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                        <span className="w-[10px] h-[10px] rounded-[2px] flex-shrink-0" style={{ backgroundColor: prod.color || '#6B7280' }} />
-                        {prod.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* TAGS */}
+            <div className="mb-2">
+              <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.tags')}</h4>
+            </div>
 
             {/* Mobile user nav */}
             {user && (
@@ -250,49 +302,116 @@ export default function About() {
         {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
         {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1 min-w-0 py-6 px-6">
+        <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
+
+          {/* ===== BANNER (same as forum page) ===== */}
+          {banner && (
+            <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
+              {banner.bannerImageUrl ? (
+                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                  className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
+              )}
+              <div className="relative z-10 flex items-center justify-between p-5 md:p-6 min-h-[140px]">
+                <div className="max-w-[60%]">
+                  {banner.bannerTitle && (
+                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">
+                      {banner.bannerTitle}
+                    </h2>
+                  )}
+                  {banner.bannerSubtitle && (
+                    <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
+                  )}
+                </div>
+              </div>
+              {banner.bannerImageUrl && (
+                <div className="absolute inset-0 bg-black/30" />
+              )}
+            </div>
+          )}
+
+          {/* ===== TAB NAV ===== */}
+          <div className="mx-4 lg:mx-5 mt-4 border-b border-gray-300 dark:border-gray-700">
+            <div className="flex items-center gap-6">
+              <span className="text-[13px] font-semibold text-[#50ba4b] border-b-2 border-[#50ba4b] pb-2 cursor-default">
+                {t('about.tabs.about')}
+              </span>
+              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default">
+                {t('about.tabs.faq')}
+              </span>
+              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden sm:block">
+                {t('about.tabs.terms')}
+              </span>
+              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden sm:block">
+                {t('about.tabs.privacy')}
+              </span>
+              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden md:block">
+                {t('about.tabs.conditions')}
+              </span>
+            </div>
+          </div>
+
+          {/* ===== ABOUT CONTENT ===== */}
           {loading ? (
             <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('common.loading')}</div>
           ) : stats ? (
-            <>
-              {/* Forum Name & Description */}
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{t('about.forumName')}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('about.forumDescription')}</p>
+            <div className="mx-4 lg:mx-5 mt-6">
+              {/* Forum Name */}
+              <h2 className="text-[17px] font-bold text-gray-900 dark:text-gray-100 mb-1">
+                {stats.aboutForumName || t('about.forumName')}
+              </h2>
+              {stats.aboutForumDescription && (
+                <p className="text-[13px] text-gray-500 dark:text-gray-400 mb-4">{stats.aboutForumDescription}</p>
+              )}
 
-              {/* Stats Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 mb-8 pb-8 border-b border-gray-300 dark:border-gray-700">
-                <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.totalMembers)}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.members')}</p>
+              {/* Stats Row: Members, Admins, Moderator, Created */}
+              <div className="flex items-center gap-6 flex-wrap text-[13px] text-gray-600 dark:text-gray-400 mb-8">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">{formatNumber(stats.totalMembers)}</span>
+                  <span>{t('about.members')}</span>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.admins.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.admins')}</p>
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">{stats.admins.length}</span>
+                  <span>{t('about.admins')}</span>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.moderators.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.moderators')}</p>
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">{stats.moderators.length}</span>
+                  <span>{t('about.moderators')}</span>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatDate(stats.forumCreatedAt)}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.created')}</p>
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{t('about.created')}</span>
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">{formatDate(stats.forumCreatedAt)}</span>
                 </div>
               </div>
 
+              {/* Two column layout */}
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left Column */}
                 <div className="flex-1 min-w-0">
                   {/* Our Admins */}
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('about.ourAdmins')}</h3>
-                  <div className="space-y-3 mb-8">
+                  <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-4">{t('about.ourAdmins')}</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                     {stats.admins.map(admin => (
                       <Link key={admin.id} to={`/profile/${admin.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                         <div className="w-10 h-10 rounded-full bg-[#50ba4b] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                           {(admin.displayName || admin.username || '?')[0].toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{admin.displayName || admin.username}</p>
-                          <p className="text-xs text-[#50ba4b]">Admin</p>
+                          <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{admin.displayName || admin.username}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">Admin</p>
                         </div>
                       </Link>
                     ))}
@@ -301,61 +420,88 @@ export default function About() {
                   {/* Our Moderators */}
                   {stats.moderators.length > 0 && (
                     <>
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('about.ourModerators')}</h3>
-                      <div className="space-y-3 mb-8">
+                      <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-4">{t('about.ourModerators')}</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                         {stats.moderators.map(mod => (
                           <Link key={mod.id} to={`/profile/${mod.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                             <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                               {(mod.displayName || mod.username || '?')[0].toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{mod.displayName || mod.username}</p>
-                              <p className="text-xs text-purple-500">Moderator</p>
+                              <p className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{mod.displayName || mod.username}</p>
+                              <p className="text-[11px] text-gray-400 dark:text-gray-500">Moderator</p>
                             </div>
                           </Link>
                         ))}
                       </div>
                     </>
                   )}
-
-                  {/* Contact Us */}
-                  <div className="border-t border-gray-300 dark:border-gray-700 pt-6">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">{t('about.contactUs')}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{t('about.contactDescription')}</p>
-                    <Link to="/support" className="inline-flex items-center gap-2 text-sm text-[#50ba4b] hover:underline font-medium">
-                      {t('about.openTicket')} &rarr;
-                    </Link>
-                  </div>
                 </div>
 
-                {/* Right Column: Site Activity */}
-                <div className="lg:w-[240px] flex-shrink-0">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('about.siteActivity')}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.postsThisWeek)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.topicsThisWeek')}</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.postsToday)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.postsToday')}</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.newMembersThisWeek)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.newMembersThisWeek')}</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.totalComments)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.totalReplies')}</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.totalPosts)}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{t('about.totalTopics')}</p>
+                {/* Right Column */}
+                <div className="lg:w-[280px] flex-shrink-0 space-y-6">
+                  {/* Contact Us */}
+                  <div>
+                    <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-3">{t('about.contactUs')}</h3>
+                    <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+                      {stats.aboutContactText || t('about.contactDescription')}
+                    </p>
+                    {stats.aboutContactEmail ? (
+                      <a href={`mailto:${stats.aboutContactEmail}`} className="text-[13px] text-[#50ba4b] hover:underline font-medium">
+                        {stats.aboutContactEmail}
+                      </a>
+                    ) : (
+                      <Link to="/support" className="text-[13px] text-[#50ba4b] hover:underline font-medium">
+                        {t('about.openTicket')} &rarr;
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Site Activity */}
+                  <div>
+                    <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-4">{t('about.siteActivity')}</h3>
+                    <div className="space-y-3.5">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-[18px] h-[18px] text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <div>
+                          <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.postsThisWeek)} {t('about.topicsLabel')}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">{t('about.inTheLast7Days')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <svg className="w-[18px] h-[18px] text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        <div>
+                          <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.postsToday)} {t('about.postsLabel')}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">{t('about.today')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <svg className="w-[18px] h-[18px] text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <div>
+                          <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.newMembersThisWeek)} {t('about.signUpsLabel')}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">{t('about.inTheLast7Days')}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <svg className="w-[18px] h-[18px] text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <div>
+                          <p className="text-[14px] font-bold text-gray-900 dark:text-gray-100">{formatNumber(stats.totalComments)} {t('about.repliesLabel')}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">{t('about.allTime')}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('about.loadFailed')}</div>
           )}

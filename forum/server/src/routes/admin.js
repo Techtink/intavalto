@@ -34,5 +34,6 @@ router.put('/settings/wallpaper', uploadWallpaper.single('loginWallpaper'), admi
 router.put('/settings/logo', uploadLogo.single('logo'), adminController.updateLogo);
 router.put('/settings/email', adminController.updateEmailSettings);
 router.put('/settings/sms', adminController.updateSmsSettings);
+router.put('/settings/about', adminController.updateAboutSettings);
 
 module.exports = router;

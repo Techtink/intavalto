@@ -54,6 +54,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // About Page Content
+    aboutForumName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    aboutForumDescription: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    aboutContactText: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    aboutContactEmail: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     // SMS (Termii) Configuration
     termiiApiKey: {
       type: DataTypes.STRING,

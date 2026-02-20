@@ -67,7 +67,7 @@ router.get('/about', async (req, res) => {
       Post.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
       Post.count({ where: { createdAt: { [Op.gte]: oneDayAgo } } }),
       User.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
-      SiteSettings.findOne({ attributes: ['createdAt'] }),
+      SiteSettings.findOne({ attributes: ['createdAt', 'aboutForumName', 'aboutForumDescription', 'aboutContactText', 'aboutContactEmail'] }),
     ]);
 
     res.json({
@@ -80,6 +80,10 @@ router.get('/about', async (req, res) => {
       postsToday,
       newMembersThisWeek,
       forumCreatedAt: settings?.createdAt || null,
+      aboutForumName: settings?.aboutForumName || null,
+      aboutForumDescription: settings?.aboutForumDescription || null,
+      aboutContactText: settings?.aboutContactText || null,
+      aboutContactEmail: settings?.aboutContactEmail || null,
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch about stats' });

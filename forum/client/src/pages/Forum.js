@@ -44,6 +44,7 @@ export default function Forum() {
   const tagDropdownRef = useRef(null);
   const searchRef = useRef(null);
   const loadMoreRef = useRef(null);
+  const moreDropdownRef = useRef(null);
 
   // Dark mode effect
   useEffect(() => {
@@ -161,6 +162,7 @@ export default function Forum() {
       if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) setShowCatDropdown(false);
       if (tagDropdownRef.current && !tagDropdownRef.current.contains(e.target)) setShowTagDropdown(false);
       if (searchRef.current && !searchRef.current.contains(e.target)) setShowSearch(false);
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target)) setMoreOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -391,28 +393,33 @@ export default function Forum() {
                 </svg>
                 {t('forum.sidebar.topics')}
               </button>
-              <button onClick={() => setMoreOpen(!moreOpen)}
-                className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                  <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-                </svg>
-                {t('forum.sidebar.more')}
-                <svg className={`w-3 h-3 ml-auto text-gray-400 transition-transform ${moreOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              {moreOpen && (
-                <>
-                  <Link to="/about" onClick={() => setSidebarOpen(false)}
-                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                    {t('forum.sidebar.about')}
-                  </Link>
-                  <Link to="/badges" onClick={() => setSidebarOpen(false)}
-                    className="w-full flex items-center gap-2.5 pl-8 pr-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                    {t('forum.sidebar.badges')}
-                  </Link>
-                </>
-              )}
+              <div className="relative" ref={moreDropdownRef}>
+                <button onClick={() => setMoreOpen(!moreOpen)}
+                  className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                  <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                  </svg>
+                  {t('forum.sidebar.more')}
+                </button>
+                {moreOpen && (
+                  <div className="absolute left-0 top-full mt-1 w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 py-1">
+                    <Link to="/about" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
+                      className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {t('forum.sidebar.about')}
+                    </Link>
+                    <Link to="/badges" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
+                      className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                      {t('forum.sidebar.badges')}
+                    </Link>
+                  </div>
+                )}
+              </div>
             </nav>
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />

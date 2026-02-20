@@ -27,6 +27,11 @@ export default function BannerSettings() {
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [currentWallpaperUrl, setCurrentWallpaperUrl] = useState(null);
   const [settings, setSettings] = useState(null);
+  const [savingAbout, setSavingAbout] = useState(false);
+  const [aboutForumName, setAboutForumName] = useState('');
+  const [aboutForumDescription, setAboutForumDescription] = useState('');
+  const [aboutContactText, setAboutContactText] = useState('');
+  const [aboutContactEmail, setAboutContactEmail] = useState('');
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -44,6 +49,10 @@ export default function BannerSettings() {
       if (data.logoUrl) {
         setCurrentLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
       }
+      setAboutForumName(data.aboutForumName || '');
+      setAboutForumDescription(data.aboutForumDescription || '');
+      setAboutContactText(data.aboutContactText || '');
+      setAboutContactEmail(data.aboutContactEmail || '');
     } catch (err) {
       console.error('Failed to load settings:', err);
     } finally {
@@ -152,6 +161,25 @@ export default function BannerSettings() {
   const showSuccess = (msg) => {
     setSuccess(msg);
     setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const handleSaveAbout = async (e) => {
+    e.preventDefault();
+    setSavingAbout(true);
+    setError('');
+    try {
+      await api.put('/admin/settings/about', {
+        aboutForumName,
+        aboutForumDescription,
+        aboutContactText,
+        aboutContactEmail,
+      });
+      showSuccess('About page settings saved successfully');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save about settings');
+    } finally {
+      setSavingAbout(false);
+    }
   };
 
   const displayImage = preview || currentImageUrl;
@@ -271,6 +299,47 @@ export default function BannerSettings() {
 
       <EmailSection settings={settings} onSuccess={showSuccess} onError={setError} />
       <SmsSection settings={settings} onSuccess={showSuccess} onError={setError} />
+
+      {/* About Page Settings */}
+      <form onSubmit={handleSaveAbout} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 max-w-2xl mt-6 transition-colors">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">About Page Content</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Customize the content displayed on the About page. Leave blank to use defaults.</p>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Forum Name</label>
+          <input type="text" value={aboutForumName} onChange={(e) => setAboutForumName(e.target.value)}
+            placeholder="Intavalto Forum"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Forum Description</label>
+          <textarea value={aboutForumDescription} onChange={(e) => setAboutForumDescription(e.target.value)}
+            placeholder="A brief description of your forum community..."
+            rows="3"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Us Text</label>
+          <textarea value={aboutContactText} onChange={(e) => setAboutContactText(e.target.value)}
+            placeholder="In the event of a critical issue or urgent matter affecting this site, please contact us..."
+            rows="3"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Email</label>
+          <input type="email" value={aboutContactEmail} onChange={(e) => setAboutContactEmail(e.target.value)}
+            placeholder="admin@intavalto.com"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
+        </div>
+
+        <button type="submit" disabled={savingAbout}
+          className="bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
+          {savingAbout ? t('admin.settings.saving') : 'Save About Settings'}
+        </button>
+      </form>
     </div>
   );
 }

@@ -423,8 +423,8 @@
     }
   },
   "about": {
-    "title": "À propos",
-    "forumName": "Forum Intavalto",
+    "title": "A Propos",
+    "forumName": "Intavalto Forum",
     "forumDescription": "Une plateforme communautaire pour les discussions, le support et la collaboration.",
     "members": "Membres",
     "admins": "Admins",
@@ -433,15 +433,29 @@
     "ourAdmins": "Nos Administrateurs",
     "ourModerators": "Nos Modérateurs",
     "contactUs": "Contactez-nous",
-    "contactDescription": "Besoin d'aide ou avez-vous une question ? Notre équipe de support est là pour vous.",
+    "contactDescription": "En cas de problème critique ou de question urgente concernant ce site, veuillez nous contacter. Si vous rencontrez du contenu inapproprié, n'hésitez pas à contacter nos modérateurs et administrateurs.",
     "openTicket": "Ouvrir un Ticket de Support",
-    "siteActivity": "Activité du Site",
-    "topicsThisWeek": "Sujets Cette Semaine",
-    "postsToday": "Publications Aujourd'hui",
-    "newMembersThisWeek": "Nouveaux Membres Cette Semaine",
-    "totalReplies": "Réponses Totales",
-    "totalTopics": "Sujets Totaux",
-    "loadFailed": "Échec du chargement des informations."
+    "siteActivity": "Activité du site",
+    "topicsThisWeek": "Sujets cette semaine",
+    "postsToday": "Publications aujourd'hui",
+    "newMembersThisWeek": "Nouveaux membres cette semaine",
+    "totalReplies": "Total des réponses",
+    "totalTopics": "Total des sujets",
+    "loadFailed": "Échec du chargement des informations.",
+    "tabs": {
+      "about": "A Propos",
+      "faq": "FAQ",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Confidentialité",
+      "conditions": "Conditions générales"
+    },
+    "topicsLabel": "sujets",
+    "postsLabel": "publications",
+    "signUpsLabel": "inscriptions",
+    "repliesLabel": "réponses",
+    "inTheLast7Days": "au cours des 7 derniers jours",
+    "today": "aujourd'hui",
+    "allTime": "depuis toujours"
   },
   "badges": {
     "title": "Badges",
