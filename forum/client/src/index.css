@@ -5,7 +5,7 @@
 body {
   margin: 0;
   font-size: 15px;
-  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", menlo, monaco, consolas, monospace;
+  font-family: "Segoe UI Mono", ui-monospace, "Cascadia Mono", "Liberation Mono", menlo, monaco, consolas, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -15,7 +15,7 @@ b, strong, .font-bold { font-weight: 600; }
 .font-semibold { font-weight: 500; }
 
 code {
-  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", menlo, monaco, consolas, monospace;
+  font-family: "Segoe UI Mono", ui-monospace, "Cascadia Mono", "Liberation Mono", menlo, monaco, consolas, monospace;
 }
 
 /* Dark mode base */
