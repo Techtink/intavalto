@@ -383,7 +383,7 @@ export default function BadgeDetail() {
             </nav>
 
             {/* Badge Header Card */}
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-5 flex items-start gap-4">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-5 flex items-start gap-4 max-w-md">
               <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 ${resolvedColor}`}>
                 <svg
                   className="w-7 h-7"
