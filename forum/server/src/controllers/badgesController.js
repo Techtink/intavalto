@@ -1,4 +1,4 @@
-const { UserBadge, User } = require('../models');
+const { UserBadge, User, sequelize } = require('../models');
 const logger = require('../utils/logger');
 
 const BADGE_SLUGS = new Set([
@@ -14,6 +14,25 @@ const BADGE_SLUGS = new Set([
   'good-reply', 'good-topic', 'hot-link', 'famous-link', 'great-reply',
   'great-topic', 'basic', 'member', 'regular', 'leader',
 ]);
+
+// GET /api/badges/counts — returns { [slug]: count } for all badges
+const getBadgeCounts = async (req, res) => {
+  try {
+    const rows = await UserBadge.findAll({
+      attributes: ['badgeSlug', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      group: ['badgeSlug'],
+      raw: true,
+    });
+    const counts = {};
+    for (const row of rows) {
+      counts[row.badgeSlug] = parseInt(row.count, 10);
+    }
+    res.json(counts);
+  } catch (err) {
+    logger.error('getBadgeCounts error', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 // GET /api/badges/:slug/users?page=1&limit=15
 const getBadgeUsers = async (req, res) => {
@@ -101,4 +120,4 @@ const revokeBadge = async (req, res) => {
   }
 };
 
-module.exports = { getBadgeUsers, grantBadge, revokeBadge };
+module.exports = { getBadgeCounts, getBadgeUsers, grantBadge, revokeBadge };

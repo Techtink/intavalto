@@ -47,6 +47,7 @@ export default function Badges() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
   const [banner, setBanner] = useState(null);
+  const [badgeCounts, setBadgeCounts] = useState({});
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -68,14 +69,16 @@ export default function Badges() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, logoRes, bannerRes] = await Promise.all([
+        const [catRes, logoRes, bannerRes, countsRes] = await Promise.all([
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
           api.get('/settings/banner').catch(() => ({ data: {} })),
+          api.get('/badges/counts').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
+        if (countsRes.data && typeof countsRes.data === 'object') setBadgeCounts(countsRes.data);
       } catch (err) {
         console.error('Failed to load data:', err);
       }
@@ -341,7 +344,9 @@ export default function Badges() {
               <div key={section.key}>
                 <h2 className="text-base font-semibold text-gray-500 dark:text-gray-400 mb-3">{section.label}</h2>
                 <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${i < BADGE_SECTIONS.length - 1 ? 'mb-6' : 'mb-8'}`}>
-                  {section.badges.map((b) => <BadgeCard key={b.slug} {...b} />)}
+                  {section.badges.map((b) => (
+                    <BadgeCard key={b.slug} {...b} count={badgeCounts[b.slug] ?? 0} />
+                  ))}
                 </div>
               </div>
             ))}
