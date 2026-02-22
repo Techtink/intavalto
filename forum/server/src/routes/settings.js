@@ -57,7 +57,6 @@ router.get('/about', async (req, res) => {
       postsThisWeek,
       postsToday,
       newMembersThisWeek,
-      settings,
     ] = await Promise.all([
       User.count(),
       Post.count(),
@@ -67,8 +66,19 @@ router.get('/about', async (req, res) => {
       Post.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
       Post.count({ where: { createdAt: { [Op.gte]: oneDayAgo } } }),
       User.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
-      SiteSettings.findOne(),
     ]);
+
+    // Fetch settings separately with fallback — new columns may not exist in DB yet
+    let settings = null;
+    try {
+      settings = await SiteSettings.findOne();
+    } catch (e) {
+      try {
+        settings = await SiteSettings.findOne({
+          attributes: ['id', 'createdAt', 'aboutForumName', 'aboutForumDescription', 'aboutContactText', 'aboutContactEmail'],
+        });
+      } catch (e2) { /* proceed with null settings */ }
+    }
 
     res.json({
       totalMembers,
