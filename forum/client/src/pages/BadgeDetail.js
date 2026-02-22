@@ -60,6 +60,7 @@ export default function BadgeDetail() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [banner, setBanner] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
 
   const [users, setUsers] = useState([]);
@@ -94,12 +95,14 @@ export default function BadgeDetail() {
   useEffect(() => {
     const fetchSidebar = async () => {
       try {
-        const [catRes, logoRes] = await Promise.all([
+        const [catRes, logoRes, bannerRes] = await Promise.all([
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
+          api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (_) {}
     };
     fetchSidebar();
@@ -340,6 +343,34 @@ export default function BadgeDetail() {
 
         {/* ===== MAIN CONTENT ===== */}
         <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
+
+          {/* ===== BANNER ===== */}
+          {banner && (
+            <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
+              {banner.bannerImageUrl ? (
+                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                  className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
+              )}
+              <div className="relative z-10 flex items-center justify-between p-5 md:p-6 min-h-[140px]">
+                <div className="max-w-[60%]">
+                  {banner.bannerTitle && (
+                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">
+                      {banner.bannerTitle}
+                    </h2>
+                  )}
+                  {banner.bannerSubtitle && (
+                    <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
+                  )}
+                </div>
+              </div>
+              {banner.bannerImageUrl && (
+                <div className="absolute inset-0 bg-black/30" />
+              )}
+            </div>
+          )}
+
           <div className="px-4 lg:px-5 py-5">
 
             {/* Breadcrumb */}
