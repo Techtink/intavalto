@@ -3,6 +3,8 @@ import api from '../../utils/api';
 import { useTranslation } from '../../i18n';
 import EmailSection from './settings/EmailSection';
 import SmsSection from './settings/SmsSection';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
@@ -32,6 +34,11 @@ export default function BannerSettings() {
   const [aboutForumDescription, setAboutForumDescription] = useState('');
   const [aboutContactText, setAboutContactText] = useState('');
   const [aboutContactEmail, setAboutContactEmail] = useState('');
+  const [faqContent, setFaqContent] = useState('');
+  const [termsContent, setTermsContent] = useState('');
+  const [privacyContent, setPrivacyContent] = useState('');
+  const [conditionsContent, setConditionsContent] = useState('');
+  const [activeEditorTab, setActiveEditorTab] = useState('faq');
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -53,6 +60,10 @@ export default function BannerSettings() {
       setAboutForumDescription(data.aboutForumDescription || '');
       setAboutContactText(data.aboutContactText || '');
       setAboutContactEmail(data.aboutContactEmail || '');
+      setFaqContent(data.faqContent || '');
+      setTermsContent(data.termsContent || '');
+      setPrivacyContent(data.privacyContent || '');
+      setConditionsContent(data.conditionsContent || '');
     } catch (err) {
       console.error('Failed to load settings:', err);
     } finally {
@@ -173,6 +184,10 @@ export default function BannerSettings() {
         aboutForumDescription,
         aboutContactText,
         aboutContactEmail,
+        faqContent,
+        termsContent,
+        privacyContent,
+        conditionsContent,
       });
       showSuccess('About page settings saved successfully');
     } catch (err) {
@@ -335,8 +350,94 @@ export default function BannerSettings() {
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#50ba4b] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
         </div>
 
+        {/* Tab Content Editors */}
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Tab Page Content</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Edit the rich content for each tab on the About page (FAQ, Terms, Privacy, Conditions).</p>
+
+          {/* Tab switcher */}
+          <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
+            {[
+              { key: 'faq', label: 'FAQ' },
+              { key: 'terms', label: 'Terms' },
+              { key: 'privacy', label: 'Privacy' },
+              { key: 'conditions', label: 'Conditions' },
+            ].map(tab => (
+              <button key={tab.key} type="button"
+                onClick={() => setActiveEditorTab(tab.key)}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  activeEditorTab === tab.key
+                    ? 'border-[#50ba4b] text-[#50ba4b]'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Editors */}
+          <div className="[&_.ql-toolbar]:rounded-t-lg [&_.ql-container]:rounded-b-lg [&_.ql-container]:min-h-[200px] [&_.ql-editor]:min-h-[200px] [&_.ql-toolbar]:border-gray-300 [&_.ql-container]:border-gray-300 dark:[&_.ql-toolbar]:border-gray-600 dark:[&_.ql-container]:border-gray-600 dark:[&_.ql-toolbar]:bg-gray-700 dark:[&_.ql-container]:bg-gray-700 dark:[&_.ql-editor]:text-gray-100 dark:[&_.ql-toolbar_.ql-stroke]:stroke-gray-300 dark:[&_.ql-toolbar_.ql-fill]:fill-gray-300 dark:[&_.ql-toolbar_.ql-picker-label]:text-gray-300">
+            {activeEditorTab === 'faq' && (
+              <ReactQuill
+                theme="snow"
+                value={faqContent}
+                onChange={setFaqContent}
+                modules={{ toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link', 'blockquote'],
+                  ['clean'],
+                ]}}
+              />
+            )}
+            {activeEditorTab === 'terms' && (
+              <ReactQuill
+                theme="snow"
+                value={termsContent}
+                onChange={setTermsContent}
+                modules={{ toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link', 'blockquote'],
+                  ['clean'],
+                ]}}
+              />
+            )}
+            {activeEditorTab === 'privacy' && (
+              <ReactQuill
+                theme="snow"
+                value={privacyContent}
+                onChange={setPrivacyContent}
+                modules={{ toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link', 'blockquote'],
+                  ['clean'],
+                ]}}
+              />
+            )}
+            {activeEditorTab === 'conditions' && (
+              <ReactQuill
+                theme="snow"
+                value={conditionsContent}
+                onChange={setConditionsContent}
+                modules={{ toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link', 'blockquote'],
+                  ['clean'],
+                ]}}
+              />
+            )}
+          </div>
+        </div>
+
         <button type="submit" disabled={savingAbout}
-          className="bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
+          className="mt-6 bg-[#50ba4b] text-white px-6 py-2 rounded-lg hover:bg-[#45a340] text-sm font-medium disabled:opacity-50 transition-colors">
           {savingAbout ? t('admin.settings.saving') : 'Save About Settings'}
         </button>
       </form>

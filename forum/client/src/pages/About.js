@@ -10,6 +10,7 @@ const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/
 export default function About() {
   const { t } = useTranslation();
   const [stats, setStats] = useState(null);
+  const [activeTab, setActiveTab] = useState('about');
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -333,29 +334,50 @@ export default function About() {
 
           {/* ===== TAB NAV ===== */}
           <div className="mx-4 lg:mx-5 mt-4 border-b border-gray-300 dark:border-gray-700">
-            <div className="flex items-center gap-6">
-              <span className="text-[13px] font-semibold text-[#50ba4b] border-b-2 border-[#50ba4b] pb-2 cursor-default">
-                {t('about.tabs.about')}
-              </span>
-              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default">
-                {t('about.tabs.faq')}
-              </span>
-              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden sm:block">
-                {t('about.tabs.terms')}
-              </span>
-              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden sm:block">
-                {t('about.tabs.privacy')}
-              </span>
-              <span className="text-[13px] text-gray-400 dark:text-gray-500 pb-2 cursor-default hidden md:block">
-                {t('about.tabs.conditions')}
-              </span>
+            <div className="flex items-center gap-1">
+              {[
+                { key: 'about', label: t('about.tabs.about'), always: true },
+                { key: 'faq', label: t('about.tabs.faq'), always: true },
+                { key: 'terms', label: t('about.tabs.terms'), always: false },
+                { key: 'privacy', label: t('about.tabs.privacy'), always: false },
+                { key: 'conditions', label: t('about.tabs.conditions'), always: false, mdOnly: true },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 pb-2 text-[13px] font-medium border-b-2 transition-colors ${
+                    tab.mdOnly ? 'hidden md:block' : tab.always ? '' : 'hidden sm:block'
+                  } ${
+                    activeTab === tab.key
+                      ? 'text-[#50ba4b] border-[#50ba4b] font-semibold'
+                      : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}>
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* ===== ABOUT CONTENT ===== */}
+          {/* ===== TAB CONTENT ===== */}
           {loading ? (
             <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('common.loading')}</div>
-          ) : stats ? (
+          ) : !stats ? (
+            <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('about.loadFailed')}</div>
+          ) : activeTab !== 'about' ? (
+            <div className="mx-4 lg:mx-5 mt-6 pb-10">
+              {stats[`${activeTab}Content`] ? (
+                <div
+                  className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 [&_h1]:text-[17px] [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:dark:text-gray-100 [&_h2]:text-[15px] [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h2]:dark:text-gray-100 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:dark:text-gray-200 [&_p]:text-[13px] [&_p]:leading-relaxed [&_li]:text-[13px] [&_a]:text-[#50ba4b] [&_a]:hover:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#50ba4b] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500"
+                  dangerouslySetInnerHTML={{ __html: stats[`${activeTab}Content`] }}
+                />
+              ) : (
+                <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+                  <p className="text-[14px]">No content has been added yet.</p>
+                  <p className="text-[12px] mt-1">An admin can add content in the Settings panel.</p>
+                </div>
+              )}
+            </div>
+          ) : (
             <div className="mx-4 lg:mx-5 mt-6">
               {/* Forum Name */}
               <h2 className="text-[17px] font-bold text-gray-900 dark:text-gray-100 mb-1">
@@ -520,8 +542,6 @@ export default function About() {
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('about.loadFailed')}</div>
           )}
         </main>
       </div>

@@ -411,12 +411,16 @@ const updateAboutSettings = async (req, res) => {
       settings = await SiteSettings.create({});
     }
 
-    const { aboutForumName, aboutForumDescription, aboutContactText, aboutContactEmail } = req.body;
+    const { aboutForumName, aboutForumDescription, aboutContactText, aboutContactEmail, faqContent, termsContent, privacyContent, conditionsContent } = req.body;
 
     if (aboutForumName !== undefined) settings.aboutForumName = aboutForumName;
     if (aboutForumDescription !== undefined) settings.aboutForumDescription = aboutForumDescription;
     if (aboutContactText !== undefined) settings.aboutContactText = aboutContactText;
     if (aboutContactEmail !== undefined) settings.aboutContactEmail = aboutContactEmail;
+    if (faqContent !== undefined) settings.faqContent = faqContent;
+    if (termsContent !== undefined) settings.termsContent = termsContent;
+    if (privacyContent !== undefined) settings.privacyContent = privacyContent;
+    if (conditionsContent !== undefined) settings.conditionsContent = conditionsContent;
 
     await settings.save();
     res.json({ message: 'About settings updated', settings });
