@@ -20,18 +20,21 @@ const useAuthStore = create((set) => ({
   user: decoded ? { id: decoded.id, email: decoded.email, role: decoded.role } : null,
   token: decoded ? storedToken : null,
   isAuthenticated: !!decoded,
+  newBadges: [],
 
-  login: (user, token) => {
+  login: (user, token, newBadges = []) => {
     localStorage.setItem('token', token);
-    set({ user, token, isAuthenticated: true });
+    set({ user, token, isAuthenticated: true, newBadges: newBadges || [] });
   },
 
   logout: () => {
     localStorage.removeItem('token');
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, newBadges: [] });
   },
 
   setUser: (user) => set({ user }),
+
+  clearNewBadges: () => set({ newBadges: [] }),
 }));
 
 // Clear invalid/expired token from storage on init

@@ -1,56 +1,82 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
-import { BADGE_SECTIONS } from '../utils/badgeData';
+import { BADGE_BY_SLUG } from '../utils/badgeData';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
-function BadgeCard({ slug, name, desc, count, iconPath, iconColor, iconFill, grantColor, color }) {
-  const resolvedColor = iconColor || color || 'text-amber-500';
-  const renderDesc = () => {
-    if (!desc) return null;
-    if (grantColor && desc.startsWith('Granted')) {
-      const rest = desc.slice('Granted'.length);
-      return (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
-          <span className="text-[#50ba4b] font-medium">Granted</span>{rest}
-        </p>
-      );
-    }
-    return <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{desc}</p>;
-  };
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return '1 day ago';
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return '1 month ago';
+  if (months < 12) return `${months} months ago`;
+  const years = Math.floor(months / 12);
+  return years === 1 ? '1 year ago' : `${years} years ago`;
+}
+
+function UserCard({ user, API_ORIGIN }) {
+  const name = user.displayName || user.username || '?';
   return (
-    <Link to={`/badges/${slug}`} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-start gap-3 hover:border-[#50ba4b]/50 hover:shadow-sm transition-all">
-      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 ${resolvedColor}`}>
-        <svg className="w-5 h-5" fill={iconFill ? 'currentColor' : 'none'} stroke={iconFill ? 'none' : 'currentColor'} strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
-        </svg>
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug">{name}</p>
-        {renderDesc()}
-        {count != null && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{count} awarded</p>
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center gap-3">
+      <div className="flex-shrink-0">
+        {user.avatar ? (
+          <img
+            src={`${API_ORIGIN}${user.avatar}`}
+            alt={name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-sm font-bold">
+            {name[0].toUpperCase()}
+          </div>
         )}
       </div>
-    </Link>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{name}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">@{user.username}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Granted {timeAgo(user.grantedAt)}</p>
+      </div>
+    </div>
   );
 }
 
-export default function Badges() {
+export default function BadgeDetail() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const badge = BADGE_BY_SLUG[slug];
+
   const [categories, setCategories] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
-  const [banner, setBanner] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
+
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(null);
+
+  const sentinelRef = useRef(null);
   const moreDropdownRef = useRef(null);
+  const loadingRef = useRef(false);
+
+  useEffect(() => {
+    if (!badge) {
+      navigate('/badges', { replace: true });
+    }
+  }, [badge, navigate]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
@@ -66,24 +92,67 @@ export default function Badges() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSidebar = async () => {
       try {
-        const [catRes, logoRes, bannerRes] = await Promise.all([
+        const [catRes, logoRes] = await Promise.all([
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
-          api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
-        if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
-      } catch (err) {
-        console.error('Failed to load data:', err);
-      }
+      } catch (_) {}
     };
-    fetchData();
+    fetchSidebar();
   }, []);
 
-  const handleLogout = () => { logout(); };
+  const fetchPage = useCallback(async (pageNum) => {
+    if (loadingRef.current || !badge) return;
+    loadingRef.current = true;
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/badges/${slug}/users`, { params: { page: pageNum, limit: 15 } });
+      setUsers((prev) => pageNum === 1 ? data.users : [...prev, ...data.users]);
+      setTotal(data.total);
+      setHasMore(data.hasMore);
+      setPage(pageNum + 1);
+    } catch (_) {
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+      loadingRef.current = false;
+    }
+  }, [slug, badge]);
+
+  // Initial load
+  useEffect(() => {
+    if (badge) {
+      setUsers([]);
+      setPage(1);
+      setHasMore(true);
+      setTotal(null);
+      fetchPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  // Infinite scroll sentinel
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
+          fetchPage(page);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, page, fetchPage]);
+
+  if (!badge) return null;
+
+  const resolvedColor = badge.iconColor || badge.color || 'text-amber-500';
 
   return (
     <div className="min-h-screen bg-[#eee] dark:bg-gray-900 transition-colors duration-200">
@@ -130,7 +199,7 @@ export default function Badges() {
                 {user.role === 'admin' && (
                   <Link to="/admin" className="text-xs text-[#50ba4b] hover:underline hidden sm:block">Admin</Link>
                 )}
-                <button onClick={handleLogout} className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hidden sm:block">{t('common.logout')}</button>
+                <button onClick={() => logout()} className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hidden sm:block">{t('common.logout')}</button>
               </div>
             ) : (
               <Link to="/login"
@@ -168,7 +237,7 @@ export default function Badges() {
                 </svg>
                 {t('forum.sidebar.badges')}
               </Link>
-              {/* More - popup dropdown */}
+              {/* More */}
               <div className="relative" ref={moreDropdownRef}>
                 <button onClick={() => setMoreOpen(!moreOpen)}
                   className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
@@ -224,27 +293,6 @@ export default function Badges() {
                 </svg>
                 {t('forum.sidebar.shop')}
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()}
-                className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c0 1.657-4.03 3-9 3s-9-1.343-9-3m18 0c0-1.657-4.03-3-9-3s-9 1.343-9 3m9-9v18" />
-                </svg>
-                {t('forum.sidebar.exploreMore')}
-              </a>
-            </div>
-
-            <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
-
-            {/* DOCUMENTATION */}
-            <div className="mb-2">
-              <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.documentation')}</h4>
-              <a href="#" onClick={(e) => e.preventDefault()}
-                className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {t('forum.sidebar.documentation')}
-              </a>
             </div>
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
@@ -262,22 +310,9 @@ export default function Badges() {
                       </Link>
                     </li>
                   ))}
-                  <li>
-                    <Link to="/forum"
-                      className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
-                      {t('forum.sidebar.allCategories')}
-                    </Link>
-                  </li>
                 </ul>
               </div>
             )}
-
-            <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
-
-            {/* TAGS */}
-            <div className="mb-2">
-              <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.tags')}</h4>
-            </div>
 
             {/* Mobile user nav */}
             {user && (
@@ -293,7 +328,7 @@ export default function Badges() {
                   <Link to="/admin" onClick={() => setSidebarOpen(false)}
                     className="block px-3 py-[7px] text-[13px] text-[#50ba4b] hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">{t('forum.sidebar.adminPanel')}</Link>
                 )}
-                <button onClick={() => { handleLogout(); setSidebarOpen(false); }}
+                <button onClick={() => { logout(); setSidebarOpen(false); }}
                   className="block w-full text-left px-3 py-[7px] text-[13px] text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded">{t('common.logout')}</button>
               </div>
             )}
@@ -305,46 +340,71 @@ export default function Badges() {
 
         {/* ===== MAIN CONTENT ===== */}
         <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
-
-          {/* ===== BANNER ===== */}
-          {banner && (
-            <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
-              {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
-                  className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
-              )}
-              <div className="relative z-10 flex items-center justify-between p-5 md:p-6 min-h-[140px]">
-                <div className="max-w-[60%]">
-                  {banner.bannerTitle && (
-                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">
-                      {banner.bannerTitle}
-                    </h2>
-                  )}
-                  {banner.bannerSubtitle && (
-                    <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
-                  )}
-                </div>
-              </div>
-              {banner.bannerImageUrl && (
-                <div className="absolute inset-0 bg-black/30" />
-              )}
-            </div>
-          )}
-
-          {/* ===== BADGES CONTENT ===== */}
           <div className="px-4 lg:px-5 py-5">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-5">Badges</h1>
 
-            {BADGE_SECTIONS.map((section, i) => (
-              <div key={section.key}>
-                <h2 className="text-base font-semibold text-gray-500 dark:text-gray-400 mb-3">{section.label}</h2>
-                <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${i < BADGE_SECTIONS.length - 1 ? 'mb-6' : 'mb-8'}`}>
-                  {section.badges.map((b) => <BadgeCard key={b.slug} {...b} />)}
-                </div>
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400 mb-4">
+              <Link to="/badges" className="hover:text-[#50ba4b] transition-colors">Badges</Link>
+              <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+              <span className="text-gray-900 dark:text-gray-100 font-medium">{badge.name}</span>
+            </nav>
+
+            {/* Badge Header Card */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-5 flex items-start gap-4">
+              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 ${resolvedColor}`}>
+                <svg
+                  className="w-7 h-7"
+                  fill={badge.iconFill ? 'currentColor' : 'none'}
+                  stroke={badge.iconFill ? 'none' : 'currentColor'}
+                  strokeWidth={1.8}
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d={badge.iconPath} />
+                </svg>
               </div>
-            ))}
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{badge.name}</h1>
+                {badge.desc && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{badge.desc}</p>
+                )}
+                {total !== null && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                    {total} {total === 1 ? 'user has' : 'users have'} been awarded this badge
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Users Grid */}
+            {users.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {users.map((u) => (
+                  <UserCard key={`${u.id}-${u.grantedAt}`} user={u} API_ORIGIN={API_ORIGIN} />
+                ))}
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!loading && users.length === 0 && (
+              <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+                <svg className="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <p className="text-sm">No users have earned this badge yet</p>
+              </div>
+            )}
+
+            {/* Loading spinner */}
+            {loading && (
+              <div className="flex justify-center py-8">
+                <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-4" />
           </div>
         </main>
       </div>

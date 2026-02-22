@@ -55,7 +55,7 @@ export default function Login() {
     setError('');
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      login(data.user, data.token);
+      login(data.user, data.token, data.newBadges);
       navigate(data.user.role === 'admin' ? '/admin' : '/forum');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');

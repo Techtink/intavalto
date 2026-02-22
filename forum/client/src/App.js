@@ -9,6 +9,8 @@ import Support from './pages/Support';
 import TicketDetail from './pages/TicketDetail';
 import About from './pages/About';
 import Badges from './pages/Badges';
+import BadgeDetail from './pages/BadgeDetail';
+import BadgeGrantedModal from './components/BadgeGrantedModal';
 import AdminLayout from './pages/AdminLayout';
 import useAuthStore from './store/authStore';
 import api from './utils/api';
@@ -36,8 +38,11 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  const newBadges = useAuthStore((state) => state.newBadges);
+
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      {newBadges && newBadges.length > 0 && <BadgeGrantedModal />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -46,6 +51,7 @@ function App() {
         <Route path="/profile/:id" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/about" element={<About />} />
         <Route path="/badges" element={<Badges />} />
+        <Route path="/badges/:slug" element={<BadgeDetail />} />
         <Route path="/support" element={<Support />} />
         <Route path="/support/:id" element={isAuthenticated ? <TicketDetail /> : <Navigate to="/login" />} />
         <Route
