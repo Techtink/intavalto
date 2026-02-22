@@ -67,7 +67,7 @@ router.get('/about', async (req, res) => {
       Post.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
       Post.count({ where: { createdAt: { [Op.gte]: oneDayAgo } } }),
       User.count({ where: { createdAt: { [Op.gte]: sevenDaysAgo } } }),
-      SiteSettings.findOne({ attributes: ['createdAt', 'aboutForumName', 'aboutForumDescription', 'aboutContactText', 'aboutContactEmail', 'faqContent', 'termsContent', 'privacyContent', 'conditionsContent'] }),
+      SiteSettings.findOne(),
     ]);
 
     res.json({
