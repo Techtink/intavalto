@@ -255,14 +255,14 @@ export default function About() {
                 <ul className="space-y-[1px]">
                   {categories.map(cat => (
                     <li key={cat.id}>
-                      <Link to="/forum" className="w-full flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                      <Link to={`/forum?categoryId=${cat.id}`} className="w-full flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
                         <span className="w-[10px] h-[10px] rounded-[2px] flex-shrink-0" style={{ backgroundColor: cat.color || '#6B7280' }} />
                         {cat.name}
                       </Link>
                     </li>
                   ))}
                   <li>
-                    <Link to="/forum"
+                    <Link to="/categories"
                       className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
                       {t('forum.sidebar.allCategories')}
                     </Link>

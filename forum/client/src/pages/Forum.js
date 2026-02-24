@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
@@ -41,6 +41,7 @@ export default function Forum() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const catDropdownRef = useRef(null);
   const tagDropdownRef = useRef(null);
@@ -53,6 +54,15 @@ export default function Forum() {
     document.documentElement.classList.toggle('dark', darkMode);
     localStorage.setItem('darkMode', String(darkMode));
   }, [darkMode]);
+
+  // Apply URL params (categoryId / tag) on initial load
+  useEffect(() => {
+    const catId = searchParams.get('categoryId');
+    const tag = searchParams.get('tag');
+    if (catId) setSelectedCategory(catId);
+    if (tag) setSelectedTag(tag);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchPosts = useCallback(async (loadPage = 1, append = false) => {
     try {
@@ -512,10 +522,10 @@ export default function Forum() {
                   </li>
                 ))}
                 <li>
-                  <button onClick={() => { selectCategory(''); setSelectedTag(''); }}
+                  <Link to="/categories"
                     className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
                     {t('forum.sidebar.allCategories')}
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -568,6 +578,12 @@ export default function Forum() {
                       </button>
                     </li>
                   ))}
+                  <li>
+                    <Link to="/tags"
+                      className="flex items-center gap-2.5 px-3 py-[5px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
+                      All Tags
+                    </Link>
+                  </li>
                 </ul>
               </div>
             )}

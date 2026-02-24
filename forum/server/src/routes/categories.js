@@ -1,7 +1,8 @@
 const express = require('express');
 const { authenticate, adminOnly } = require('../middleware/auth');
 const { validateCreateCategory, handleValidationErrors } = require('../middleware/validation');
-const { Category } = require('../models');
+const { Category, Post, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -12,7 +13,18 @@ router.get('/', async (req, res) => {
       where: { isActive: true },
       order: [['displayOrder', 'ASC']]
     });
-    res.json(categories);
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const weekCounts = await Post.findAll({
+      attributes: ['categoryId', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+      where: { categoryId: { [Op.ne]: null }, createdAt: { [Op.gte]: sevenDaysAgo } },
+      group: ['categoryId'],
+      raw: true,
+    });
+    const countMap = {};
+    weekCounts.forEach(r => { countMap[r.categoryId] = parseInt(r.count, 10); });
+
+    res.json(categories.map(cat => ({ ...cat.toJSON(), postsThisWeek: countMap[cat.id] || 0 })));
   } catch (error) {
     logger.error('Error fetching categories', error);
     res.status(500).json({ message: 'Failed to fetch categories' });

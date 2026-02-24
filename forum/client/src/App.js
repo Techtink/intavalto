@@ -8,6 +8,8 @@ import Profile from './pages/Profile';
 import Support from './pages/Support';
 import TicketDetail from './pages/TicketDetail';
 import About from './pages/About';
+import AllCategories from './pages/AllCategories';
+import AllTags from './pages/AllTags';
 import Badges from './pages/Badges';
 import BadgeDetail from './pages/BadgeDetail';
 import BadgeGrantedModal from './components/BadgeGrantedModal';
@@ -50,6 +52,8 @@ function App() {
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/profile/:id" element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/about" element={<About />} />
+        <Route path="/categories" element={<AllCategories />} />
+        <Route path="/tags" element={<AllTags />} />
         <Route path="/badges" element={<Badges />} />
         <Route path="/badges/:slug" element={<BadgeDetail />} />
         <Route path="/support" element={<Support />} />
