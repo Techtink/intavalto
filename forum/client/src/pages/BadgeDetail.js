@@ -8,40 +8,218 @@ import { BADGE_BY_SLUG } from '../utils/badgeData';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
 
-function timeAgo(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const days = Math.floor(diff / 86400000);
-  if (days === 0) return 'today';
-  if (days === 1) return '1 day ago';
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months === 1) return '1 month ago';
-  if (months < 12) return `${months} months ago`;
-  const years = Math.floor(months / 12);
-  return years === 1 ? '1 year ago' : `${years} years ago`;
+const AVATAR_COLORS = [
+  '#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444',
+  '#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16',
+];
+
+function getAvatarColor(username) {
+  return AVATAR_COLORS[(username || '').charCodeAt(0) % AVATAR_COLORS.length];
 }
 
-function UserCard({ user, API_ORIGIN }) {
+function getAvatarUrl(avatar) {
+  if (!avatar) return null;
+  if (avatar.startsWith('http')) return avatar;
+  return `${API_ORIGIN}${avatar}`;
+}
+
+function UserAvatar({ user, size = 40 }) {
   const name = user.displayName || user.username || '?';
+  const url = getAvatarUrl(user.avatar);
+  if (url) {
+    return (
+      <img src={url} alt={name}
+        style={{ width: size, height: size }}
+        className="rounded-full object-cover flex-shrink-0" />
+    );
+  }
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center gap-3">
-      <div className="flex-shrink-0">
-        {user.avatar ? (
-          <img
-            src={`${API_ORIGIN}${user.avatar}`}
-            alt={name}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+    <div
+      style={{ width: size, height: size, backgroundColor: getAvatarColor(user.username), fontSize: size * 0.38 }}
+      className="rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 select-none"
+    >
+      {name[0].toUpperCase()}
+    </div>
+  );
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d`;
+  if (diff < 86400 * 30) return `${Math.floor(diff / (86400 * 7))}w`;
+  return `${Math.floor(diff / (86400 * 30))}mo`;
+}
+
+// Aqara-style user profile popup card
+function UserProfilePopup({ userId, onClose }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    api.get(`/users/${userId}/card`)
+      .then(res => { setData(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [userId]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const displayedBadges = data?.badges
+    ? data.badges.slice(0, 3).map(slug => BADGE_BY_SLUG[slug]).filter(Boolean)
+    : [];
+  const extraBadgeCount = data?.badges ? Math.max(0, data.badges.length - 3) : 0;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/10" />
+
+      {/* Card */}
+      <div
+        ref={cardRef}
+        onClick={e => e.stopPropagation()}
+        className="relative w-[390px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors z-10"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-14">
+            <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : !data ? (
+          <div className="p-6 text-center text-gray-400 text-sm">Failed to load profile.</div>
         ) : (
-          <div className="w-10 h-10 rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-sm font-bold">
-            {name[0].toUpperCase()}
+          <div className="p-5">
+            {/* Header: avatar + name */}
+            <div className="flex items-center gap-3 mb-4 pr-6">
+              <Link to={`/profile/${data.id}`} onClick={onClose}>
+                <UserAvatar user={data} size={72} />
+              </Link>
+              <div className="min-w-0 flex-1">
+                <Link
+                  to={`/profile/${data.id}`}
+                  onClick={onClose}
+                  className="text-[17px] font-bold text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] transition-colors leading-tight block truncate"
+                >
+                  {data.displayName || data.username}
+                </Link>
+                <p className="text-[13px] text-gray-400 dark:text-gray-500 truncate">@{data.username}</p>
+              </div>
+            </div>
+
+            {/* Bio */}
+            {data.bio && (
+              <p className="text-[13.5px] text-gray-600 dark:text-gray-300 mb-4 leading-relaxed line-clamp-4">
+                {data.bio}
+              </p>
+            )}
+
+            {/* Featured Topic */}
+            {data.latestPost && (
+              <div className="mb-3">
+                <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">
+                  Featured Topic
+                </p>
+                <Link
+                  to={`/posts/${data.latestPost.id}`}
+                  onClick={onClose}
+                  className="text-[13px] text-[#3b82f6] hover:underline leading-snug line-clamp-2 block"
+                >
+                  {data.latestPost.title}
+                </Link>
+              </div>
+            )}
+
+            {/* Location */}
+            {data.location && (
+              <div className="flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400 mb-3">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                <span>{data.location}</span>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center gap-1 text-[12px] text-gray-400 dark:text-gray-500 mb-4 flex-wrap">
+              {data.latestPost && (
+                <>
+                  <span>Posted <span className="text-gray-600 dark:text-gray-400">{formatDate(data.latestPost.createdAt)}</span></span>
+                  <span className="mx-1">·</span>
+                </>
+              )}
+              <span>Joined <span className="text-gray-600 dark:text-gray-400">{formatDate(data.createdAt)}</span></span>
+              {data.reputation > 0 && (
+                <>
+                  <span className="mx-1">·</span>
+                  <span>Rep <span className="text-gray-600 dark:text-gray-400">{data.reputation}</span></span>
+                </>
+              )}
+            </div>
+
+            {/* Badges */}
+            {data.badges && data.badges.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-3 border-t border-gray-100 dark:border-gray-700">
+                {displayedBadges.map(badge => (
+                  <Link
+                    key={badge.slug}
+                    to={`/badges/${badge.slug}`}
+                    onClick={onClose}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-[12px] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <svg
+                      className={`w-3 h-3 ${badge.iconColor || badge.color || 'text-amber-500'}`}
+                      fill={badge.iconFill ? 'currentColor' : 'none'}
+                      stroke={badge.iconFill ? 'none' : 'currentColor'}
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d={badge.iconPath} />
+                    </svg>
+                    {badge.name}
+                  </Link>
+                ))}
+                {extraBadgeCount > 0 && (
+                  <Link
+                    to={`/profile/${data.id}`}
+                    onClick={onClose}
+                    className="inline-flex items-center px-2.5 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-[12px] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    +{extraBadgeCount} More
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{name}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">@{user.username}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Granted {timeAgo(user.grantedAt)}</p>
       </div>
     </div>
   );
@@ -68,15 +246,14 @@ export default function BadgeDetail() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(null);
+  const [popupUserId, setPopupUserId] = useState(null);
 
   const sentinelRef = useRef(null);
   const moreDropdownRef = useRef(null);
   const loadingRef = useRef(false);
 
   useEffect(() => {
-    if (!badge) {
-      navigate('/badges', { replace: true });
-    }
+    if (!badge) navigate('/badges', { replace: true });
   }, [badge, navigate]);
 
   useEffect(() => {
@@ -113,7 +290,7 @@ export default function BadgeDetail() {
     loadingRef.current = true;
     setLoading(true);
     try {
-      const { data } = await api.get(`/badges/${slug}/users`, { params: { page: pageNum, limit: 15 } });
+      const { data } = await api.get(`/badges/${slug}/users`, { params: { page: pageNum, limit: 18 } });
       setUsers((prev) => pageNum === 1 ? data.users : [...prev, ...data.users]);
       setTotal(data.total);
       setHasMore(data.hasMore);
@@ -126,7 +303,6 @@ export default function BadgeDetail() {
     }
   }, [slug, badge]);
 
-  // Initial load
   useEffect(() => {
     if (badge) {
       setUsers([]);
@@ -138,7 +314,6 @@ export default function BadgeDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  // Infinite scroll sentinel
   useEffect(() => {
     if (!sentinelRef.current) return;
     const observer = new IntersectionObserver(
@@ -159,7 +334,7 @@ export default function BadgeDetail() {
 
   return (
     <div className="min-h-screen bg-[#eee] dark:bg-gray-900 transition-colors duration-200">
-      {/* ===== HEADER ===== */}
+      {/* HEADER */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors">
         <div className="max-w-[1200px] mx-auto h-[52px] flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
@@ -215,7 +390,7 @@ export default function BadgeDetail() {
       </header>
 
       <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-52px)]">
-        {/* ===== SIDEBAR ===== */}
+        {/* SIDEBAR */}
         <aside className={`
           w-[220px] flex-shrink-0 bg-[#f7f7f7] dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-colors
           ${sidebarOpen
@@ -232,7 +407,6 @@ export default function BadgeDetail() {
                 </svg>
                 {t('forum.sidebar.topics')}
               </Link>
-              {/* Badges - highlighted as active */}
               <Link to="/badges"
                 className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] font-medium bg-gray-200/80 dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors">
                 <svg className="w-[16px] h-[16px] text-[#50ba4b]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -240,7 +414,6 @@ export default function BadgeDetail() {
                 </svg>
                 {t('forum.sidebar.badges')}
               </Link>
-              {/* More */}
               <div className="relative" ref={moreDropdownRef}>
                 <button onClick={() => setMoreOpen(!moreOpen)}
                   className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
@@ -253,17 +426,7 @@ export default function BadgeDetail() {
                   <div className="absolute left-0 top-full mt-1 w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 py-1">
                     <Link to="/about" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
                       className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
                       {t('forum.sidebar.about')}
-                    </Link>
-                    <Link to="/badges" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
-                      className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-[#50ba4b] font-medium bg-green-50 dark:bg-green-900/20 transition-colors">
-                      <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                      </svg>
-                      {t('forum.sidebar.badges')}
                     </Link>
                   </div>
                 )}
@@ -272,7 +435,6 @@ export default function BadgeDetail() {
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
 
-            {/* RESOURCES */}
             <div className="mb-2">
               <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.resources')}</h4>
               <Link to="/support" onClick={() => setSidebarOpen(false)}
@@ -300,14 +462,14 @@ export default function BadgeDetail() {
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
 
-            {/* CATEGORIES */}
             {categories.length > 0 && (
               <div className="mb-2">
                 <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">{t('forum.sidebar.categories')}</h4>
                 <ul className="space-y-[1px]">
                   {categories.map(cat => (
                     <li key={cat.id}>
-                      <Link to="/forum" className="w-full flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
+                      <Link to={`/forum?categoryId=${cat.id}`} onClick={() => setSidebarOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
                         <span className="w-[10px] h-[10px] rounded-[2px] flex-shrink-0" style={{ backgroundColor: cat.color || '#6B7280' }} />
                         {cat.name}
                       </Link>
@@ -317,7 +479,6 @@ export default function BadgeDetail() {
               </div>
             )}
 
-            {/* Mobile user nav */}
             {user && (
               <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 pt-3 mt-3 mx-2 space-y-[1px]">
                 <Link to={`/profile/${user.id}`} onClick={() => setSidebarOpen(false)}
@@ -338,13 +499,12 @@ export default function BadgeDetail() {
           </div>
         </aside>
 
-        {/* Sidebar overlay mobile */}
         {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-        {/* ===== MAIN CONTENT ===== */}
+        {/* MAIN */}
         <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
 
-          {/* ===== BANNER ===== */}
+          {/* Banner */}
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
@@ -353,29 +513,27 @@ export default function BadgeDetail() {
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
               )}
-              <div className="relative z-10 flex items-center justify-between p-5 md:p-6 min-h-[140px]">
+              <div className="relative z-10 flex items-center p-5 md:p-6 min-h-[140px]">
                 <div className="max-w-[60%]">
                   {banner.bannerTitle && (
-                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">
-                      {banner.bannerTitle}
-                    </h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">{banner.bannerTitle}</h2>
                   )}
                   {banner.bannerSubtitle && (
                     <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
                   )}
                 </div>
               </div>
-              {banner.bannerImageUrl && (
-                <div className="absolute inset-0 bg-black/30" />
-              )}
+              {banner.bannerImageUrl && <div className="absolute inset-0 bg-black/30" />}
             </div>
           )}
 
           <div className="px-4 lg:px-5 py-5">
 
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400 mb-4">
-              <Link to="/badges" className="hover:text-[#50ba4b] transition-colors">Badges</Link>
+            <nav className="flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400 mb-5">
+              <Link to="/badges" className="hover:text-[#50ba4b] transition-colors font-medium" style={{ color: '#3b82f6' }}>
+                Badges
+              </Link>
               <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -383,8 +541,8 @@ export default function BadgeDetail() {
             </nav>
 
             {/* Badge Header Card */}
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 mb-5 flex items-start gap-4 max-w-md">
-              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 ${resolvedColor}`}>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6 flex items-start gap-4 max-w-lg">
+              <div className={`flex-shrink-0 w-[60px] h-[60px] rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 ${resolvedColor}`}>
                 <svg
                   className="w-7 h-7"
                   fill={badge.iconFill ? 'currentColor' : 'none'}
@@ -396,24 +554,41 @@ export default function BadgeDetail() {
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{badge.name}</h1>
+                <h1 className="text-[18px] font-bold text-gray-900 dark:text-gray-100 leading-tight mb-1">{badge.name}</h1>
                 {badge.desc && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{badge.desc}</p>
+                  <p className="text-[13.5px] text-gray-500 dark:text-gray-400 leading-relaxed">{badge.desc}</p>
                 )}
                 {total !== null && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                    {total} {total === 1 ? 'user has' : 'users have'} been awarded this badge
+                  <p className="text-[12px] text-gray-400 dark:text-gray-500 mt-2">
+                    {total} awarded
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Users Grid */}
+            {/* Users Grid — Aqara style: 3 columns, avatar + name + date */}
             {users.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {users.map((u) => (
-                  <UserCard key={`${u.id}-${u.grantedAt}`} user={u} API_ORIGIN={API_ORIGIN} />
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2">
+                {users.map((u) => {
+                  const name = u.displayName || u.username || '?';
+                  return (
+                    <button
+                      key={`${u.id}-${u.grantedAt}`}
+                      onClick={() => setPopupUserId(u.id)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left w-full group"
+                    >
+                      <UserAvatar user={u} size={44} />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-200 truncate group-hover:text-[#50ba4b] transition-colors">
+                          {name}
+                        </p>
+                        <p className="text-[12px] text-gray-400 dark:text-gray-500">
+                          Granted {formatDate(u.grantedAt)}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
@@ -427,18 +602,24 @@ export default function BadgeDetail() {
               </div>
             )}
 
-            {/* Loading spinner */}
             {loading && (
               <div className="flex justify-center py-8">
                 <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
-            {/* Infinite scroll sentinel */}
             <div ref={sentinelRef} className="h-4" />
           </div>
         </main>
       </div>
+
+      {/* User Profile Popup */}
+      {popupUserId && (
+        <UserProfilePopup
+          userId={popupUserId}
+          onClose={() => setPopupUserId(null)}
+        />
+      )}
     </div>
   );
 }

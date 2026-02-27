@@ -24,7 +24,40 @@ router.get('/', async (req, res) => {
     const countMap = {};
     weekCounts.forEach(r => { countMap[r.categoryId] = parseInt(r.count, 10); });
 
-    res.json(categories.map(cat => ({ ...cat.toJSON(), postsThisWeek: countMap[cat.id] || 0 })));
+    // Fetch latest post per category with author and reply count
+    const catIds = categories.map(c => c.id);
+    let latestPostMap = {};
+    if (catIds.length > 0) {
+      const [latestRows] = await sequelize.query(`
+        SELECT DISTINCT ON (p."categoryId")
+          p.id, p.title, p.tags, p."categoryId", p."createdAt",
+          u.username, u.avatar,
+          COUNT(c.id)::int AS "replyCount"
+        FROM "Posts" p
+        LEFT JOIN "Users" u ON u.id = p."userId"
+        LEFT JOIN "Comments" c ON c."postId" = p.id
+        WHERE p."categoryId" IN (:catIds) AND p."isApproved" = true
+        GROUP BY p.id, p.title, p.tags, p."categoryId", p."createdAt", u.username, u.avatar
+        ORDER BY p."categoryId", p."createdAt" DESC
+      `, { replacements: { catIds } });
+
+      latestRows.forEach(row => {
+        latestPostMap[row.categoryId] = {
+          id: row.id,
+          title: row.title,
+          tags: row.tags || [],
+          replyCount: row.replyCount || 0,
+          createdAt: row.createdAt,
+          author: row.username ? { username: row.username, avatar: row.avatar } : null,
+        };
+      });
+    }
+
+    res.json(categories.map(cat => ({
+      ...cat.toJSON(),
+      postsThisWeek: countMap[cat.id] || 0,
+      latestPost: latestPostMap[cat.id] || null,
+    })));
   } catch (error) {
     logger.error('Error fetching categories', error);
     res.status(500).json({ message: 'Failed to fetch categories' });

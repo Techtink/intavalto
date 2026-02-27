@@ -1,10 +1,50 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import LanguageSelector from '../components/LanguageSelector';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d`;
+  if (diff < 86400 * 30) return `${Math.floor(diff / (86400 * 7))}w`;
+  return `${Math.floor(diff / (86400 * 30))}mo`;
+}
+
+const AVATAR_COLORS = [
+  '#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444',
+  '#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16',
+];
+
+function UserAvatar({ user, size = 32 }) {
+  if (!user) return null;
+  const letter = (user.username || '?')[0].toUpperCase();
+  const colorIdx = (user.username || '').charCodeAt(0) % AVATAR_COLORS.length;
+  if (user.avatar) {
+    return (
+      <img
+        src={user.avatar.startsWith('http') ? user.avatar : `${API_ORIGIN}${user.avatar}`}
+        alt={user.username}
+        style={{ width: size, height: size }}
+        className="rounded-full object-cover flex-shrink-0"
+      />
+    );
+  }
+  return (
+    <div
+      style={{ width: size, height: size, backgroundColor: AVATAR_COLORS[colorIdx], fontSize: size * 0.4 }}
+      className="rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+    >
+      {letter}
+    </div>
+  );
+}
 
 export default function AllCategories() {
   const [categories, setCategories] = useState([]);
@@ -51,7 +91,7 @@ export default function AllCategories() {
   const handleLogout = () => { logout(); };
 
   return (
-    <div className="min-h-screen bg-[#eee] dark:bg-gray-900 transition-colors duration-200">
+    <div className="min-h-screen bg-[#f0f0f0] dark:bg-gray-900 transition-colors duration-200">
       {/* HEADER */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors">
         <div className="max-w-[1200px] mx-auto h-[52px] flex items-center justify-between px-4">
@@ -137,16 +177,10 @@ export default function AllCategories() {
                   <div className="absolute left-0 top-full mt-1 w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 py-1">
                     <Link to="/about" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
                       className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
                       About
                     </Link>
                     <Link to="/badges" onClick={() => { setMoreOpen(false); setSidebarOpen(false); }}
                       className="flex items-center gap-2.5 px-4 py-[8px] text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                      <svg className="w-[15px] h-[15px] text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                      </svg>
                       Badges
                     </Link>
                   </div>
@@ -184,7 +218,7 @@ export default function AllCategories() {
 
             <div className="border-b border-gray-200 dark:border-gray-700 my-2 mx-2" />
 
-            {/* CATEGORIES — highlighted as active */}
+            {/* CATEGORIES */}
             <div className="mb-2">
               <h4 className="px-3 py-1.5 text-[10.5px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.08em]">Categories</h4>
               <ul className="space-y-[1px]">
@@ -242,58 +276,143 @@ export default function AllCategories() {
         {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
-          <div className="mx-4 lg:mx-5 mt-6 pb-10">
+        <main className="flex-1 min-w-0 bg-[#f0f0f0] dark:bg-gray-900 transition-colors">
+          <div className="mx-4 lg:mx-6 mt-5 pb-10">
 
-            {/* Tab nav */}
-            <div className="flex gap-1 mb-5">
+            {/* Top nav tabs — Aqara-style */}
+            <div className="flex items-center gap-1 mb-4 flex-wrap">
+              {/* Pill dropdowns */}
               <Link to="/categories"
-                className="px-4 py-1.5 rounded-full text-[13px] font-medium bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900">
-                Categories
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[12.5px] font-medium bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 leading-none">
+                categories
+                <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </Link>
               <Link to="/tags"
-                className="px-4 py-1.5 rounded-full text-[13px] font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                Tags
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[12.5px] font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 leading-none transition-colors">
+                tags
+                <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </Link>
+
+              {/* Divider */}
+              <div className="h-4 border-l border-gray-300 dark:border-gray-600 mx-1 hidden sm:block" />
+
+              {/* Content tabs */}
+              <Link to="/forum"
+                className="px-3 py-1 text-[13px] text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors rounded hidden sm:block">
+                Latest
+              </Link>
+              <Link to="/forum?sort=featured"
+                className="px-3 py-1 text-[13px] text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors rounded hidden sm:block">
+                ⭐ Featured
+              </Link>
+              <Link to="/forum?sort=popular"
+                className="px-3 py-1 text-[13px] text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors rounded hidden sm:block">
+                🔥 Hot
+              </Link>
+              <span className="px-3 py-1 text-[13px] font-medium text-gray-900 dark:text-gray-100 border-b-2 border-gray-800 dark:border-gray-200 hidden sm:block">
+                Categories
+              </span>
             </div>
 
-            {/* Category list */}
+            {/* Categories Table */}
             {loading ? (
-              <div className="flex justify-center py-12">
+              <div className="flex justify-center py-16">
                 <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : categories.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-10 text-center text-gray-400 dark:text-gray-500 text-sm">
                 No categories yet.
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
+                {/* Table header */}
+                <div className="grid grid-cols-[1fr_100px_minmax(260px,2fr)] border-b border-gray-100 dark:border-gray-700 px-4 py-2">
+                  <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Category</div>
+                  <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center hidden sm:block">Topics</div>
+                  <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide hidden lg:block">Latest</div>
+                </div>
+
+                {/* Category rows */}
                 {categories.map((cat, i) => (
-                  <Link
+                  <div
                     key={cat.id}
-                    to={`/forum?categoryId=${cat.id}`}
-                    className={`flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group ${
-                      i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
+                    className={`grid grid-cols-[1fr_100px_minmax(260px,2fr)] items-start px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors ${
+                      i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
                     }`}
-                    style={{ borderLeft: `4px solid ${cat.color || '#6B7280'}` }}
                   >
-                    <div className="min-w-0 flex-1 pl-2">
-                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-[14px] group-hover:text-[#50ba4b] transition-colors">
-                        {cat.name}
+                    {/* Category column */}
+                    <div className="min-w-0 pr-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className="w-[11px] h-[11px] rounded-sm flex-shrink-0"
+                          style={{ backgroundColor: cat.color || '#6B7280' }}
+                        />
+                        <Link
+                          to={`/forum?categoryId=${cat.id}`}
+                          className="font-semibold text-[14px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight"
+                        >
+                          {cat.name}
+                        </Link>
                       </div>
                       {cat.description && (
-                        <div className="text-gray-500 dark:text-gray-400 text-[12.5px] mt-0.5 line-clamp-1">
+                        <p className="text-[12.5px] text-gray-500 dark:text-gray-400 leading-snug ml-[19px] line-clamp-2">
                           {cat.description}
-                        </div>
+                        </p>
                       )}
                     </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-[11.5px]">
-                        <span className="font-semibold text-gray-700 dark:text-gray-200">{cat.postsThisWeek || 0}</span>
-                        <span className="text-gray-400 dark:text-gray-500">/ week</span>
-                      </span>
+
+                    {/* Topics column */}
+                    <div className="text-center hidden sm:block pt-0.5">
+                      <span className="text-[13.5px] font-semibold text-gray-700 dark:text-gray-200">{cat.postsThisWeek}</span>
+                      <span className="text-[12px] text-gray-400 dark:text-gray-500"> / week</span>
                     </div>
-                  </Link>
+
+                    {/* Latest column */}
+                    <div className="hidden lg:flex items-start gap-2.5 pt-0.5 min-w-0">
+                      {cat.latestPost ? (
+                        <>
+                          <UserAvatar user={cat.latestPost.author} size={30} />
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              to={`/posts/${cat.latestPost.id}`}
+                              className="text-[13px] text-gray-800 dark:text-gray-200 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] font-medium leading-snug line-clamp-2 transition-colors block"
+                            >
+                              {cat.latestPost.title}
+                            </Link>
+                            {cat.latestPost.tags && cat.latestPost.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {cat.latestPost.tags.slice(0, 3).map(tag => (
+                                  <Link
+                                    key={tag}
+                                    to={`/forum?tag=${encodeURIComponent(tag)}`}
+                                    className="inline-block px-1.5 py-0.5 text-[10.5px] rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                  >
+                                    {tag}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[11.5px] text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold text-gray-700 dark:text-gray-300">{cat.latestPost.replyCount}</span>
+                                <span className="ml-0.5">replies</span>
+                              </span>
+                              <span className="text-gray-300 dark:text-gray-600">·</span>
+                              <span className="text-[11.5px] text-gray-400 dark:text-gray-500">
+                                {timeAgo(cat.latestPost.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-[12px] text-gray-300 dark:text-gray-600 italic">No posts yet</span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

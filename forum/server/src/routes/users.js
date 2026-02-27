@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
 const { handleValidationErrors } = require('../middleware/validation');
 const { uploadAvatar } = require('../middleware/upload');
-const { User } = require('../models');
+const { User, UserBadge, Post } = require('../models');
 const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
@@ -61,13 +61,33 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
+// Public card data for profile popup (badges + latest post)
+router.get('/:id/card', authenticate, async (req, res) => {
+  try {
+    const [user, badges, latestPost] = await Promise.all([
+      User.findByPk(req.params.id, { attributes: { exclude: ['password', 'email'] } }),
+      UserBadge.findAll({ where: { userId: req.params.id }, order: [['grantedAt', 'ASC']], raw: true }),
+      Post.findOne({ where: { userId: req.params.id, isApproved: true }, order: [['createdAt', 'DESC']], attributes: ['id', 'title', 'createdAt'] }),
+    ]);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({
+      ...user.toJSON(),
+      badges: badges.map(b => b.badgeSlug),
+      latestPost: latestPost ? { id: latestPost.id, title: latestPost.title, createdAt: latestPost.createdAt } : null,
+    });
+  } catch (error) {
+    logger.error('Error fetching user card', error);
+    res.status(500).json({ message: 'Failed to fetch user card' });
+  }
+});
+
 router.put('/:id', authenticate, validateProfileUpdate, handleValidationErrors, async (req, res) => {
   try {
     if (req.user.id !== req.params.id) {
       return res.status(403).json({ message: 'Cannot update another user' });
     }
 
-    const { displayName, bio } = req.body;
+    const { displayName, bio, location } = req.body;
     const user = await User.findByPk(req.params.id, {
       attributes: { exclude: ['password'] }
     });
@@ -76,6 +96,7 @@ router.put('/:id', authenticate, validateProfileUpdate, handleValidationErrors, 
 
     if (displayName !== undefined) user.displayName = displayName;
     if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
 
     await user.save();
     res.json({ message: 'Profile updated', user });

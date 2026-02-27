@@ -51,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     reputation: {
       type: DataTypes.INTEGER,
       defaultValue: 0
