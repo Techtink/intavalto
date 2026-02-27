@@ -6,6 +6,12 @@ async function createTicketReplyNotification(ticket, reply, replier) {
     const isStaffReply = reply.isStaff;
     const notifications = [];
 
+    // Ensure we have username/displayName — req.user only has id/email/role
+    if (!replier.username) {
+      const fullUser = await User.findByPk(replier.id, { attributes: ['id', 'username', 'displayName'] });
+      if (fullUser) replier = fullUser;
+    }
+
     if (isStaffReply && ticket.userId !== replier.id) {
       // Staff replied → notify ticket owner
       notifications.push({
