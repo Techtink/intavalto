@@ -52,6 +52,7 @@ export default function AllCategories() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [banner, setBanner] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -73,12 +74,14 @@ export default function AllCategories() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, logoRes] = await Promise.all([
+        const [catRes, logoRes, bannerRes] = await Promise.all([
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
+          api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load categories:', err);
       } finally {
@@ -277,6 +280,30 @@ export default function AllCategories() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 min-w-0 bg-[#f0f0f0] dark:bg-gray-900 transition-colors">
+
+          {/* BANNER */}
+          {banner && (
+            <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
+              {banner.bannerImageUrl ? (
+                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                  className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
+              )}
+              {banner.bannerImageUrl && <div className="absolute inset-0 bg-black/30" />}
+              <div className="relative z-10 flex items-center p-5 md:p-6 min-h-[140px]">
+                <div className="max-w-[60%]">
+                  {banner.bannerTitle && (
+                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">{banner.bannerTitle}</h2>
+                  )}
+                  {banner.bannerSubtitle && (
+                    <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mx-4 lg:mx-6 mt-5 pb-10">
 
             {/* Top nav tabs — Aqara-style */}
@@ -332,45 +359,43 @@ export default function AllCategories() {
 
                 {/* Header row */}
                 <div className="flex border-b border-gray-100 dark:border-gray-700 px-4 py-2">
-                  <div className="flex-1 text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Category</div>
-                  <div className="w-[90px] text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center hidden sm:block">Topics</div>
-                  <div className="w-[280px] xl:w-[320px] text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide pl-5 hidden lg:block border-l border-gray-100 dark:border-gray-700 ml-4">Latest</div>
+                  <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category</div>
+                  <div className="w-[88px] text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center hidden sm:block">Topics</div>
+                  <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider pl-4 hidden lg:block">Latest</div>
                 </div>
 
                 {/* Data rows */}
                 {categories.map((cat, i) => (
                   <div
                     key={cat.id}
-                    className={`flex items-start px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors ${
+                    className={`flex items-stretch hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors ${
                       i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
                     }`}
+                    style={{ borderLeft: `4px solid ${cat.color || '#6B7280'}` }}
                   >
                     {/* Category */}
-                    <div className="flex-1 min-w-0 pr-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-[11px] h-[11px] rounded-sm flex-shrink-0" style={{ backgroundColor: cat.color || '#6B7280' }} />
-                        <Link
-                          to={`/forum?categoryId=${cat.id}`}
-                          className="font-semibold text-[14px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight"
-                        >
-                          {cat.name}
-                        </Link>
-                      </div>
+                    <div className="flex-1 min-w-0 px-4 py-4">
+                      <Link
+                        to={`/forum?categoryId=${cat.id}`}
+                        className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight block"
+                      >
+                        {cat.name}
+                      </Link>
                       {cat.description && (
-                        <p className="text-[12.5px] text-gray-500 dark:text-gray-400 leading-snug ml-[19px] line-clamp-2">
+                        <p className="text-[12.5px] text-gray-500 dark:text-gray-400 leading-snug mt-1 line-clamp-2">
                           {cat.description}
                         </p>
                       )}
                     </div>
 
                     {/* Topics */}
-                    <div className="w-[90px] text-center hidden sm:block pt-0.5 flex-shrink-0">
-                      <span className="text-[13.5px] font-semibold text-gray-700 dark:text-gray-200">{cat.postsThisWeek}</span>
-                      <span className="text-[12px] text-gray-400 dark:text-gray-500"> / week</span>
+                    <div className="w-[88px] text-center hidden sm:flex flex-col items-center justify-center flex-shrink-0 py-4">
+                      <span className="text-[17px] font-bold text-gray-800 dark:text-gray-100 leading-none">{cat.postsThisWeek ?? 0}</span>
+                      <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">/ week</span>
                     </div>
 
                     {/* Latest */}
-                    <div className="w-[280px] xl:w-[320px] flex-shrink-0 hidden lg:flex items-start gap-2.5 pl-5 border-l border-gray-100 dark:border-gray-700 ml-4">
+                    <div className="flex-1 hidden lg:flex items-center gap-2.5 pl-4 pr-4 py-4 border-l border-gray-100 dark:border-gray-700">
                       {cat.latestPost ? (
                         <>
                           <UserAvatar user={cat.latestPost.author} size={30} />
@@ -394,18 +419,14 @@ export default function AllCategories() {
                                 ))}
                               </div>
                             )}
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[11.5px] text-gray-500 dark:text-gray-400">
-                                <span className="font-semibold text-gray-700 dark:text-gray-300">{cat.latestPost.replyCount}</span>
-                                <span className="ml-0.5">replies</span>
-                              </span>
-                              <span className="text-gray-300 dark:text-gray-600">·</span>
-                              <span className="text-[11.5px] text-gray-400 dark:text-gray-500">{timeAgo(cat.latestPost.createdAt)}</span>
-                            </div>
+                          </div>
+                          <div className="flex-shrink-0 text-right ml-2">
+                            <div className="text-[13px] font-bold text-gray-700 dark:text-gray-200">{cat.latestPost.replyCount}</div>
+                            <div className="text-[11px] text-gray-400 dark:text-gray-500">{timeAgo(cat.latestPost.createdAt)}</div>
                           </div>
                         </>
                       ) : (
-                        <span className="text-[12px] text-gray-300 dark:text-gray-600 italic pt-1">No posts yet</span>
+                        <span className="text-[12px] text-gray-300 dark:text-gray-600 italic">No posts yet</span>
                       )}
                     </div>
                   </div>
