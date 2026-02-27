@@ -355,22 +355,20 @@ export default function AllCategories() {
                 No categories yet.
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
+              <div className="overflow-hidden">
 
                 {/* Header row */}
-                <div className="flex border-b border-gray-100 dark:border-gray-700 px-4 py-2">
+                <div className="flex border-b border-gray-200 dark:border-gray-700 px-4 py-2">
                   <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category</div>
                   <div className="w-[88px] text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center hidden sm:block">Topics</div>
                   <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider pl-4 hidden lg:block">Latest</div>
                 </div>
 
                 {/* Data rows */}
-                {categories.map((cat, i) => (
+                {categories.map((cat) => (
                   <div
                     key={cat.id}
-                    className={`flex items-stretch hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors ${
-                      i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
-                    }`}
+                    className="flex items-stretch bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors mt-[3px] rounded-sm"
                     style={{ borderLeft: `4px solid ${cat.color || '#6B7280'}` }}
                   >
                     {/* Category */}
