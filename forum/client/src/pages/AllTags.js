@@ -14,6 +14,7 @@ export default function AllTags() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [banner, setBanner] = useState(null);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -35,14 +36,16 @@ export default function AllTags() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tagsRes, catRes, logoRes] = await Promise.all([
+        const [tagsRes, catRes, logoRes, bannerRes] = await Promise.all([
           api.get('/posts/tags').catch(() => ({ data: [] })),
           api.get('/categories').catch(() => ({ data: [] })),
           api.get('/settings/logo').catch(() => ({ data: {} })),
+          api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setTags(Array.isArray(tagsRes.data) ? tagsRes.data : []);
         setCategories(Array.isArray(catRes.data) ? catRes.data : []);
         if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load tags:', err);
       } finally {
@@ -251,48 +254,53 @@ export default function AllTags() {
         {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
-          <div className="mx-4 lg:mx-5 mt-6 pb-10">
+        <main className="flex-1 min-w-0 bg-[#f0f0f0] dark:bg-gray-900 transition-colors">
 
-            {/* Tab nav */}
-            <div className="flex gap-1 mb-5">
-              <Link to="/categories"
-                className="px-4 py-1.5 rounded-full text-[13px] font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                Categories
-              </Link>
-              <Link to="/tags"
-                className="px-4 py-1.5 rounded-full text-[13px] font-medium bg-gray-800 dark:bg-gray-100 text-white dark:text-gray-900">
-                Tags
-              </Link>
-            </div>
-
-            {/* Tags heading + sort */}
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
-                Tags <span className="text-gray-400 dark:text-gray-500 font-normal text-[13px] ml-1">({tags.length})</span>
-              </h1>
-              <div className="flex items-center gap-1 text-[12.5px] text-gray-500 dark:text-gray-400">
-                <span className="mr-1">Sort by:</span>
-                <button
-                  onClick={() => setSortBy('count')}
-                  className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                    sortBy === 'count'
-                      ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 font-medium'
-                      : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}>
-                  count
-                </button>
-                <button
-                  onClick={() => setSortBy('name')}
-                  className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                    sortBy === 'name'
-                      ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 font-medium'
-                      : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}>
-                  name
-                </button>
+          {/* BANNER */}
+          {banner && (
+            <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
+              {banner.bannerImageUrl ? (
+                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                  className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
+              )}
+              {banner.bannerImageUrl && <div className="absolute inset-0 bg-black/30" />}
+              <div className="relative z-10 flex items-center p-5 md:p-6 min-h-[140px]">
+                <div className="max-w-[60%]">
+                  {banner.bannerTitle && (
+                    <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg leading-tight">{banner.bannerTitle}</h2>
+                  )}
+                  {banner.bannerSubtitle && (
+                    <p className="text-sm text-white/80 mt-2 drop-shadow">{banner.bannerSubtitle}</p>
+                  )}
+                </div>
               </div>
             </div>
+          )}
+
+          <div className="mx-4 lg:mx-6 mt-6 pb-10">
+
+            {/* "Tags" heading */}
+            <h1 className="text-[26px] font-bold text-gray-900 dark:text-gray-100 mb-1">Tags</h1>
+
+            {/* Sort by */}
+            <div className="flex items-center gap-1 text-[13px] text-gray-500 dark:text-gray-400 mb-6">
+              <span>Sort by:</span>
+              <button
+                onClick={() => setSortBy('count')}
+                className={`underline transition-colors ${sortBy === 'count' ? 'text-[#50ba4b]' : 'text-blue-500 hover:text-blue-700 dark:text-blue-400'}`}>
+                count
+              </button>
+              <button
+                onClick={() => setSortBy('name')}
+                className={`underline transition-colors ${sortBy === 'name' ? 'text-[#50ba4b]' : 'text-blue-500 hover:text-blue-700 dark:text-blue-400'}`}>
+                name
+              </button>
+            </div>
+
+            {/* "All tags" section heading */}
+            <h2 className="text-[15px] font-semibold text-gray-700 dark:text-gray-300 mb-3">All tags</h2>
 
             {/* Tags grid */}
             {loading ? (
@@ -300,26 +308,16 @@ export default function AllTags() {
                 <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : sortedTags.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center text-gray-400 dark:text-gray-500 text-sm">
-                No tags yet.
-              </div>
+              <p className="text-[13px] text-gray-400 dark:text-gray-500">No tags yet.</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-1 gap-x-6">
                 {sortedTags.map(({ tag, count }) => (
                   <Link
                     key={tag}
                     to={`/forum?tag=${encodeURIComponent(tag)}`}
-                    className="bg-white dark:bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-between hover:shadow-sm transition-shadow group"
+                    className="text-[13.5px] text-gray-800 dark:text-gray-200 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors py-[3px] block"
                   >
-                    <span className="flex items-center gap-1.5 min-w-0">
-                      <svg className="w-[13px] h-[13px] text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                      </svg>
-                      <span className="text-[13px] font-medium text-gray-700 dark:text-gray-200 group-hover:text-[#50ba4b] transition-colors truncate">
-                        {tag}
-                      </span>
-                    </span>
-                    <span className="text-[11.5px] text-gray-400 dark:text-gray-500 ml-3 flex-shrink-0">× {count}</span>
+                    {tag} <span className="text-gray-500 dark:text-gray-400">x {count}</span>
                   </Link>
                 ))}
               </div>
