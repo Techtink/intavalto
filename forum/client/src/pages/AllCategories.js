@@ -358,21 +358,21 @@ export default function AllCategories() {
               <div className="overflow-hidden">
 
                 {/* Header row */}
-                <div className="flex border-b border-gray-300 dark:border-gray-600 px-4 py-2">
-                  <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Category</div>
-                  <div className="w-[88px] text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center hidden sm:block">Topics</div>
-                  <div className="flex-1 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider pl-4 hidden lg:block">Latest</div>
+                <div className="flex gap-x-2 py-2">
+                  <div className="flex-1 px-4 pb-2 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-b border-gray-300 dark:border-gray-600">Category</div>
+                  <div className="w-[88px] pb-2 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-center hidden sm:block border-b border-gray-300 dark:border-gray-600">Topics</div>
+                  <div className="flex-1 pl-4 pb-2 text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider hidden lg:block border-b border-gray-300 dark:border-gray-600">Latest</div>
                 </div>
 
                 {/* Data rows */}
                 {categories.map((cat) => (
                   <div
                     key={cat.id}
-                    className="flex items-stretch hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-gray-300 dark:border-gray-600"
+                    className="flex items-stretch gap-x-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                     style={{ borderLeft: `4px solid ${cat.color || '#6B7280'}` }}
                   >
                     {/* Category */}
-                    <div className="flex-1 min-w-0 px-4 py-4">
+                    <div className="flex-1 min-w-0 px-4 py-4 border-b border-gray-300 dark:border-gray-600">
                       <Link
                         to={`/forum?categoryId=${cat.id}`}
                         className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight block"
@@ -387,13 +387,13 @@ export default function AllCategories() {
                     </div>
 
                     {/* Topics */}
-                    <div className="w-[88px] text-center hidden sm:flex flex-col items-center justify-center flex-shrink-0 py-4">
+                    <div className="w-[88px] text-center hidden sm:flex flex-col items-center justify-center flex-shrink-0 py-4 border-b border-gray-300 dark:border-gray-600">
                       <span className="text-[17px] font-bold text-gray-800 dark:text-gray-100 leading-none">{cat.postsThisWeek ?? 0}</span>
                       <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">/ week</span>
                     </div>
 
                     {/* Latest */}
-                    <div className="flex-1 hidden lg:flex items-center gap-2.5 pl-4 pr-4 py-4 border-l border-gray-100 dark:border-gray-700">
+                    <div className="flex-1 hidden lg:flex items-center gap-2.5 pl-4 pr-4 py-4 border-b border-gray-300 dark:border-gray-600">
                       {cat.latestPost ? (
                         <>
                           <UserAvatar user={cat.latestPost.author} size={30} />
