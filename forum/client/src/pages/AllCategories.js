@@ -318,7 +318,7 @@ export default function AllCategories() {
               </span>
             </div>
 
-            {/* Two-panel layout: Category+Topics | Latest */}
+            {/* Categories — single table, 3 columns */}
             {loading ? (
               <div className="flex justify-center py-16">
                 <div className="w-6 h-6 border-2 border-[#50ba4b] border-t-transparent rounded-full animate-spin" />
@@ -328,61 +328,49 @@ export default function AllCategories() {
                 No categories yet.
               </div>
             ) : (
-              <div className="flex gap-3 items-start">
+              <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
 
-                {/* LEFT PANEL: Category + Topics */}
-                <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
-                  {/* Header */}
-                  <div className="grid grid-cols-[1fr_90px] border-b border-gray-100 dark:border-gray-700 px-4 py-2">
-                    <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Category</div>
-                    <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center hidden sm:block">Topics</div>
-                  </div>
-                  {/* Rows */}
-                  {categories.map((cat, i) => (
-                    <div
-                      key={cat.id}
-                      className={`grid grid-cols-[1fr_90px] items-start px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors ${
-                        i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
-                      }`}
-                    >
-                      <div className="min-w-0 pr-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="w-[11px] h-[11px] rounded-sm flex-shrink-0" style={{ backgroundColor: cat.color || '#6B7280' }} />
-                          <Link
-                            to={`/forum?categoryId=${cat.id}`}
-                            className="font-semibold text-[14px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight"
-                          >
-                            {cat.name}
-                          </Link>
-                        </div>
-                        {cat.description && (
-                          <p className="text-[12.5px] text-gray-500 dark:text-gray-400 leading-snug ml-[19px] line-clamp-2">
-                            {cat.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-center hidden sm:block pt-0.5">
-                        <span className="text-[13.5px] font-semibold text-gray-700 dark:text-gray-200">{cat.postsThisWeek}</span>
-                        <span className="text-[12px] text-gray-400 dark:text-gray-500"> / week</span>
-                      </div>
-                    </div>
-                  ))}
+                {/* Header row */}
+                <div className="flex border-b border-gray-100 dark:border-gray-700 px-4 py-2">
+                  <div className="flex-1 text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Category</div>
+                  <div className="w-[90px] text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center hidden sm:block">Topics</div>
+                  <div className="w-[280px] xl:w-[320px] text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide pl-5 hidden lg:block border-l border-gray-100 dark:border-gray-700 ml-4">Latest</div>
                 </div>
 
-                {/* RIGHT PANEL: Latest — separate card */}
-                <div className="w-[280px] xl:w-[320px] flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hidden lg:block">
-                  {/* Header */}
-                  <div className="border-b border-gray-100 dark:border-gray-700 px-4 py-2">
-                    <div className="text-[11.5px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Latest</div>
-                  </div>
-                  {/* Rows */}
-                  {categories.map((cat, i) => (
-                    <div
-                      key={cat.id}
-                      className={`flex items-start gap-2.5 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors ${
-                        i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
-                      }`}
-                    >
+                {/* Data rows */}
+                {categories.map((cat, i) => (
+                  <div
+                    key={cat.id}
+                    className={`flex items-start px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors ${
+                      i < categories.length - 1 ? 'border-b border-gray-100 dark:border-gray-700/60' : ''
+                    }`}
+                  >
+                    {/* Category */}
+                    <div className="flex-1 min-w-0 pr-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-[11px] h-[11px] rounded-sm flex-shrink-0" style={{ backgroundColor: cat.color || '#6B7280' }} />
+                        <Link
+                          to={`/forum?categoryId=${cat.id}`}
+                          className="font-semibold text-[14px] text-gray-900 dark:text-gray-100 hover:text-[#50ba4b] dark:hover:text-[#50ba4b] transition-colors leading-tight"
+                        >
+                          {cat.name}
+                        </Link>
+                      </div>
+                      {cat.description && (
+                        <p className="text-[12.5px] text-gray-500 dark:text-gray-400 leading-snug ml-[19px] line-clamp-2">
+                          {cat.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Topics */}
+                    <div className="w-[90px] text-center hidden sm:block pt-0.5 flex-shrink-0">
+                      <span className="text-[13.5px] font-semibold text-gray-700 dark:text-gray-200">{cat.postsThisWeek}</span>
+                      <span className="text-[12px] text-gray-400 dark:text-gray-500"> / week</span>
+                    </div>
+
+                    {/* Latest */}
+                    <div className="w-[280px] xl:w-[320px] flex-shrink-0 hidden lg:flex items-start gap-2.5 pl-5 border-l border-gray-100 dark:border-gray-700 ml-4">
                       {cat.latestPost ? (
                         <>
                           <UserAvatar user={cat.latestPost.author} size={30} />
@@ -420,9 +408,8 @@ export default function AllCategories() {
                         <span className="text-[12px] text-gray-300 dark:text-gray-600 italic pt-1">No posts yet</span>
                       )}
                     </div>
-                  ))}
-                </div>
-
+                  </div>
+                ))}
               </div>
             )}
           </div>
