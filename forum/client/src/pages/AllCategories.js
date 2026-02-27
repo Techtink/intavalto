@@ -368,7 +368,7 @@ export default function AllCategories() {
                 {categories.map((cat) => (
                   <div
                     key={cat.id}
-                    className="flex items-stretch bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors mt-[3px] rounded-sm"
+                    className="flex items-stretch hover:bg-black/5 dark:hover:bg-white/5 transition-colors mt-[3px]"
                     style={{ borderLeft: `4px solid ${cat.color || '#6B7280'}` }}
                   >
                     {/* Category */}
