@@ -800,6 +800,7 @@ export default function Forum() {
                   </select>
                   <input type="text" placeholder={t('forum.newPost.tagsPlaceholder')} value={newPost.tags}
                     onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     className="flex-1 min-w-[160px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-[13px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400" />
                 </div>
                 <button type="submit" disabled={newPost.title.length < 5 || newPost.content.length < 20}
