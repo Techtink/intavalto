@@ -458,13 +458,6 @@ export default function Forum() {
                 </svg>
                 {t('forum.sidebar.support')}
               </Link>
-              <a href="#" onClick={(e) => e.preventDefault()}
-                className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
-                <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-                {t('forum.sidebar.developerPlatform')}
-              </a>
               <a href="https://intavalto.com/" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-[7px] rounded text-[13px] text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-colors">
                 <svg className="w-[16px] h-[16px] text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -522,10 +515,10 @@ export default function Forum() {
                   </li>
                 ))}
                 <li>
-                  <Link to="/categories"
+                  <button onClick={() => { selectCategory(''); setSelectedTag(''); setSidebarOpen(false); }}
                     className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
                     {t('forum.sidebar.allCategories')}
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -550,7 +543,7 @@ export default function Forum() {
                   </li>
                 ))}
                 <li>
-                  <button onClick={() => { selectProduct(''); setSelectedTag(''); }}
+                  <button onClick={() => { selectProduct(''); selectCategory(''); setSelectedTag(''); }}
                     className="flex items-center gap-2.5 px-3 py-[6px] rounded text-[13px] text-gray-400 dark:text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300 w-full transition-colors">
                     {t('forum.sidebar.allProducts')}
                   </button>

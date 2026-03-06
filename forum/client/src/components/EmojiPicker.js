@@ -32,7 +32,7 @@ export default function EmojiPicker({ value, onChange }) {
           placeholder="Click to pick" />
       </div>
       {open && (
-        <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 p-2 w-[280px]">
+        <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-30 p-2 w-full min-w-[200px]">
           <div className="grid grid-cols-10 gap-0.5">
             {EMOJIS.map(emoji => (
               <button key={emoji} type="button"
