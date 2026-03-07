@@ -54,6 +54,33 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Ensure all SiteSettings columns exist (safe for repeated runs)
+const runMigrations = async () => {
+  const qi = sequelize.getQueryInterface();
+  const cols = [
+    ['logoUrl',               'VARCHAR(255)'],
+    ['loginWallpaperUrl',     'VARCHAR(255)'],
+    ['aboutForumName',        'VARCHAR(255)'],
+    ['aboutForumDescription', 'TEXT'],
+    ['aboutContactText',      'TEXT'],
+    ['aboutContactEmail',     'VARCHAR(255)'],
+    ['faqContent',            'TEXT'],
+    ['termsContent',          'TEXT'],
+    ['privacyContent',        'TEXT'],
+    ['conditionsContent',     'TEXT'],
+    ['termiiApiKey',          'VARCHAR(255)'],
+    ['termiiSenderId',        'VARCHAR(11)'],
+  ];
+  for (const [col, type] of cols) {
+    try {
+      await sequelize.query(`ALTER TABLE "SiteSettings" ADD COLUMN IF NOT EXISTS "${col}" ${type}`);
+    } catch (e) {
+      logger.warn(`Migration skipped for column ${col}:`, e.message);
+    }
+  }
+  logger.info('SiteSettings migrations applied');
+};
+
 const startServer = async () => {
   try {
     await sequelize.authenticate();
@@ -66,6 +93,9 @@ const startServer = async () => {
     } catch (syncErr) {
       logger.warn('Database sync failed (tables may need manual creation):', syncErr.message);
     }
+
+    // Always run migrations to ensure new columns exist (safe to run repeatedly)
+    await runMigrations();
 
     // Seed admin user if ADMIN_EMAIL and ADMIN_PASSWORD are set
     if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
