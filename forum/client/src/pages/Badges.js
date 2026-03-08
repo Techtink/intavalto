@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
 import { BADGE_SECTIONS } from '../utils/badgeData';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 function BadgeCard({ slug, name, desc, count, iconPath, iconColor, iconFill, grantColor, color }) {
   const resolvedColor = iconColor || color || 'text-amber-500';

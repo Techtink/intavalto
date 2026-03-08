@@ -5,7 +5,7 @@ import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 export default function About() {
   const { t } = useTranslation();

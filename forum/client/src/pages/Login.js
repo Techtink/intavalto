@@ -5,7 +5,7 @@ import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 const FALLBACK_BG = 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80';
 
 const inputClass = 'w-full px-4 py-2.5 border border-gray-300 rounded-lg text-[14px] text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#50ba4b] focus:border-transparent transition-shadow';

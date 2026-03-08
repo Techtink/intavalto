@@ -6,7 +6,7 @@ import SmsSection from './settings/SmsSection';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 export default function BannerSettings() {
   const { t } = useTranslation();

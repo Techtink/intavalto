@@ -30,8 +30,9 @@ app.use('/api/', apiLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Static file serving for uploads
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Static file serving for uploads — served under /api/uploads so DO App Platform
+// routes it correctly (the platform proxies /api/* to the backend container)
+app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/api/health', require('./routes/health'));

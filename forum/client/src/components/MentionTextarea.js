@@ -101,7 +101,7 @@ export default function MentionTextarea({ value, onChange, placeholder, rows = 3
     }
   }, [showMentions, mentionResults, selectedIndex, insertMention]);
 
-  const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+  const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
   return (
     <div className="relative">

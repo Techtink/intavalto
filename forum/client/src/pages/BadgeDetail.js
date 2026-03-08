@@ -6,7 +6,7 @@ import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
 import { BADGE_BY_SLUG } from '../utils/badgeData';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 const AVATAR_COLORS = [
   '#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444',

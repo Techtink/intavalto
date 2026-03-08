@@ -4,7 +4,7 @@ import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 const statusColors = {
   open: 'bg-green-100 text-[#45a340] dark:bg-green-900/30 dark:text-[#50ba4b]',

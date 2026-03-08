@@ -7,7 +7,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import MentionTextarea from '../components/MentionTextarea';
 import NotificationBell from '../components/NotificationBell';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 export default function Forum() {
   const [posts, setPosts] = useState([]);

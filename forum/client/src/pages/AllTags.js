@@ -4,7 +4,7 @@ import api from '../utils/api';
 import useAuthStore from '../store/authStore';
 import LanguageSelector from '../components/LanguageSelector';
 
-const API_ORIGIN = (process.env.REACT_APP_API_URL || `${window.location.origin}/api`).replace('/api', '');
+const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
 
 export default function AllTags() {
   const [tags, setTags] = useState([]);
