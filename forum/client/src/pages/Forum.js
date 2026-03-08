@@ -8,6 +8,7 @@ import MentionTextarea from '../components/MentionTextarea';
 import NotificationBell from '../components/NotificationBell';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 export default function Forum() {
   const [posts, setPosts] = useState([]);
@@ -171,7 +172,7 @@ export default function Forum() {
     const fetchLogo = async () => {
       try {
         const { data } = await api.get('/settings/logo');
-        if (data.logoUrl) setLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
+        if (data.logoUrl) setLogoUrl(fileUrl(data.logoUrl));
       } catch (error) { /* non-critical */ }
     };
     fetchBanner();
@@ -612,7 +613,7 @@ export default function Forum() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
@@ -886,7 +887,7 @@ export default function Forum() {
                                         <div key={u.id} className="w-[24px] h-[24px] rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold ring-2 ring-white dark:ring-gray-800 overflow-hidden"
                                           title={u.username}>
                                           {u.avatar ? (
-                                            <img src={`${API_ORIGIN}${u.avatar}`} alt={u.username} className="w-full h-full object-cover" />
+                                            <img src={fileUrl(u.avatar)} alt={u.username} className="w-full h-full object-cover" />
                                           ) : (
                                             (u.username || '?')[0].toUpperCase()
                                           )}

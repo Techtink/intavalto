@@ -5,6 +5,7 @@ import useAuthStore from '../store/authStore';
 import LanguageSelector from '../components/LanguageSelector';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -29,7 +30,7 @@ function UserAvatar({ user, size = 32 }) {
   if (user.avatar) {
     return (
       <img
-        src={user.avatar.startsWith('http') ? user.avatar : `${API_ORIGIN}${user.avatar}`}
+        src={user.avatar.startsWith('http') ? user.avatar : fileUrl(user.avatar)}
         alt={user.username}
         style={{ width: size, height: size }}
         className="rounded-full object-cover flex-shrink-0"
@@ -80,7 +81,7 @@ export default function AllCategories() {
           api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : []);
-        if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (logoRes.data?.logoUrl) setLogoUrl(fileUrl(logoRes.data.logoUrl));
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load categories:', err);
@@ -285,7 +286,7 @@ export default function AllCategories() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />

@@ -7,6 +7,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import { BADGE_BY_SLUG } from '../utils/badgeData';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 const AVATAR_COLORS = [
   '#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444',
@@ -20,7 +21,7 @@ function getAvatarColor(username) {
 function getAvatarUrl(avatar) {
   if (!avatar) return null;
   if (avatar.startsWith('http')) return avatar;
-  return `${API_ORIGIN}${avatar}`;
+  return fileUrl(avatar);
 }
 
 function UserAvatar({ user, size = 40 }) {
@@ -278,7 +279,7 @@ export default function BadgeDetail() {
           api.get('/settings/banner').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
-        if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (logoRes.data?.logoUrl) setLogoUrl(fileUrl(logoRes.data.logoUrl));
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (_) {}
     };
@@ -508,7 +509,7 @@ export default function BadgeDetail() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />

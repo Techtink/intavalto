@@ -7,6 +7,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import { BADGE_SECTIONS } from '../utils/badgeData';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 function BadgeCard({ slug, name, desc, count, iconPath, iconColor, iconFill, grantColor, color }) {
   const resolvedColor = iconColor || color || 'text-amber-500';
@@ -76,7 +77,7 @@ export default function Badges() {
           api.get('/badges/counts').catch(() => ({ data: {} })),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
-        if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (logoRes.data?.logoUrl) setLogoUrl(fileUrl(logoRes.data.logoUrl));
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
         if (countsRes.data && typeof countsRes.data === 'object') setBadgeCounts(countsRes.data);
       } catch (err) {
@@ -313,7 +314,7 @@ export default function Badges() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />

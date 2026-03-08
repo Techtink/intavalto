@@ -7,6 +7,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 export default function BannerSettings() {
   const { t } = useTranslation();
@@ -48,13 +49,13 @@ export default function BannerSettings() {
       setBannerTitle(data.bannerTitle || '');
       setBannerSubtitle(data.bannerSubtitle || '');
       if (data.bannerImageUrl) {
-        setCurrentImageUrl(`${API_ORIGIN}${data.bannerImageUrl}`);
+        setCurrentImageUrl(fileUrl(data.bannerImageUrl));
       }
       if (data.loginWallpaperUrl) {
-        setCurrentWallpaperUrl(`${API_ORIGIN}${data.loginWallpaperUrl}`);
+        setCurrentWallpaperUrl(fileUrl(data.loginWallpaperUrl));
       }
       if (data.logoUrl) {
-        setCurrentLogoUrl(`${API_ORIGIN}${data.logoUrl}`);
+        setCurrentLogoUrl(fileUrl(data.logoUrl));
       }
       setAboutForumName(data.aboutForumName || '');
       setAboutForumDescription(data.aboutForumDescription || '');
@@ -97,7 +98,7 @@ export default function BannerSettings() {
       const { data } = await api.put('/admin/settings', formData);
 
       if (data.settings.bannerImageUrl) {
-        setCurrentImageUrl(`${API_ORIGIN}${data.settings.bannerImageUrl}`);
+        setCurrentImageUrl(fileUrl(data.settings.bannerImageUrl));
       }
       setSelectedFile(null);
       setPreview(null);
@@ -127,7 +128,7 @@ export default function BannerSettings() {
       formData.append('loginWallpaper', selectedWallpaper);
       const { data } = await api.put('/admin/settings/wallpaper', formData);
       if (data.settings.loginWallpaperUrl) {
-        setCurrentWallpaperUrl(`${API_ORIGIN}${data.settings.loginWallpaperUrl}`);
+        setCurrentWallpaperUrl(fileUrl(data.settings.loginWallpaperUrl));
       }
       setSelectedWallpaper(null);
       setWallpaperPreview(null);
@@ -157,7 +158,7 @@ export default function BannerSettings() {
       formData.append('logo', selectedLogo);
       const { data } = await api.put('/admin/settings/logo', formData);
       if (data.settings.logoUrl) {
-        setCurrentLogoUrl(`${API_ORIGIN}${data.settings.logoUrl}`);
+        setCurrentLogoUrl(fileUrl(data.settings.logoUrl));
       }
       setSelectedLogo(null);
       setLogoPreview(null);

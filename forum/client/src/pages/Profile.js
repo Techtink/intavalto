@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n';
 import AvatarCropModal from '../components/AvatarCropModal';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 export default function Profile() {
   const { id } = useParams();
@@ -104,7 +105,7 @@ export default function Profile() {
 
   const getAvatarUrl = (avatar) => {
     if (!avatar) return null;
-    if (avatar.startsWith('/uploads')) return `${API_ORIGIN}${avatar}`;
+    if (avatar.startsWith('/uploads')) return fileUrl(avatar);
     return avatar;
   };
 

@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
+const { getFileUrl, useSpaces } = require('../utils/storage');
 
 const safeUserFields = ['id', 'username', 'email', 'displayName', 'bio', 'avatar', 'role', 'isActive', 'isBanned', 'banReason', 'reputation', 'createdAt', 'updatedAt'];
 
@@ -279,14 +280,11 @@ const updateSiteSettings = async (req, res) => {
 
     // Handle file upload
     if (req.file) {
-      // Delete old banner file if it exists
-      if (settings.bannerImageUrl) {
+      if (!useSpaces && settings.bannerImageUrl && settings.bannerImageUrl.startsWith('/uploads/')) {
         const oldPath = path.join(__dirname, '../..', settings.bannerImageUrl);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      settings.bannerImageUrl = `/uploads/banners/${req.file.filename}`;
+      settings.bannerImageUrl = getFileUrl(req.file, 'banners');
     }
 
     await settings.save();
@@ -305,14 +303,11 @@ const updateLoginWallpaper = async (req, res) => {
     }
 
     if (req.file) {
-      // Delete old wallpaper file if it exists
-      if (settings.loginWallpaperUrl) {
+      if (!useSpaces && settings.loginWallpaperUrl && settings.loginWallpaperUrl.startsWith('/uploads/')) {
         const oldPath = path.join(__dirname, '../..', settings.loginWallpaperUrl);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      settings.loginWallpaperUrl = `/uploads/wallpapers/${req.file.filename}`;
+      settings.loginWallpaperUrl = getFileUrl(req.file, 'wallpapers');
       await settings.save();
     }
 
@@ -331,13 +326,11 @@ const updateLogo = async (req, res) => {
     }
 
     if (req.file) {
-      if (settings.logoUrl) {
+      if (!useSpaces && settings.logoUrl && settings.logoUrl.startsWith('/uploads/')) {
         const oldPath = path.join(__dirname, '../..', settings.logoUrl);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      settings.logoUrl = `/uploads/logos/${req.file.filename}`;
+      settings.logoUrl = getFileUrl(req.file, 'logos');
       await settings.save();
     }
 

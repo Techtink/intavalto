@@ -6,6 +6,7 @@ import { useTranslation } from '../i18n';
 import LanguageSelector from '../components/LanguageSelector';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 export default function About() {
   const { t } = useTranslation();
@@ -49,7 +50,7 @@ export default function About() {
         setStats(aboutRes.data);
         setCategories(Array.isArray(catRes.data) ? catRes.data : catRes.data?.categories || []);
         setProducts(Array.isArray(prodRes.data) ? prodRes.data : prodRes.data?.products || []);
-        if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (logoRes.data?.logoUrl) setLogoUrl(fileUrl(logoRes.data.logoUrl));
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load about data:', err);
@@ -309,7 +310,7 @@ export default function About() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
@@ -428,7 +429,7 @@ export default function About() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                     {stats.admins.map(admin => {
                       const avatarUrl = admin.avatar
-                        ? (admin.avatar.startsWith('/uploads') ? `${API_ORIGIN}${admin.avatar}` : admin.avatar)
+                        ? (admin.avatar.startsWith('/uploads') ? fileUrl(admin.avatar) : admin.avatar)
                         : null;
                       return (
                         <Link key={admin.id} to={`/profile/${admin.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -455,7 +456,7 @@ export default function About() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                         {stats.moderators.map(mod => {
                           const modAvatarUrl = mod.avatar
-                            ? (mod.avatar.startsWith('/uploads') ? `${API_ORIGIN}${mod.avatar}` : mod.avatar)
+                            ? (mod.avatar.startsWith('/uploads') ? fileUrl(mod.avatar) : mod.avatar)
                             : null;
                           return (
                             <Link key={mod.id} to={`/profile/${mod.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">

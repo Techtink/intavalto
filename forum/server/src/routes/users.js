@@ -7,6 +7,7 @@ const { User, UserBadge, Post } = require('../models');
 const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
+const { getFileUrl, useSpaces } = require('../utils/storage');
 
 const { Op } = require('sequelize');
 
@@ -122,15 +123,12 @@ router.put('/:id/avatar', authenticate, uploadAvatar.single('avatar'), async (re
     });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Delete old avatar file if it exists
-    if (user.avatar && user.avatar.startsWith('/uploads/avatars/')) {
+    if (!useSpaces && user.avatar && user.avatar.startsWith('/uploads/avatars/')) {
       const oldPath = path.join(__dirname, '../..', user.avatar);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
-      }
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     }
 
-    user.avatar = `/uploads/avatars/${req.file.filename}`;
+    user.avatar = getFileUrl(req.file, 'avatars');
     await user.save();
 
     res.json({ message: 'Avatar updated', user });

@@ -102,6 +102,7 @@ export default function MentionTextarea({ value, onChange, placeholder, rows = 3
   }, [showMentions, mentionResults, selectedIndex, insertMention]);
 
   const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
   return (
     <div className="relative">
@@ -145,7 +146,7 @@ export default function MentionTextarea({ value, onChange, placeholder, rows = 3
             >
               <div className="w-6 h-6 rounded-full bg-[#50ba4b] flex items-center justify-center text-white text-[10px] font-bold overflow-hidden flex-shrink-0">
                 {user.avatar ? (
-                  <img src={`${API_ORIGIN}${user.avatar}`} alt="" className="w-full h-full object-cover" />
+                  <img src={fileUrl(user.avatar)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   (user.username || '?')[0].toUpperCase()
                 )}

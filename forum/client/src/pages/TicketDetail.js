@@ -5,6 +5,7 @@ import useAuthStore from '../store/authStore';
 import { useTranslation } from '../i18n';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 const statusColors = {
   open: 'bg-green-100 text-[#45a340] dark:bg-green-900/30 dark:text-[#50ba4b]',
@@ -155,9 +156,9 @@ export default function TicketDetail() {
           {ticket.attachments && ticket.attachments.length > 0 && (
             <div className="flex gap-3 mt-4 flex-wrap">
               {ticket.attachments.map((url, i) => (
-                <a key={i} href={`${API_ORIGIN}${url}`} target="_blank" rel="noopener noreferrer"
+                <a key={i} href={fileUrl(url)} target="_blank" rel="noopener noreferrer"
                   className="block w-24 h-24 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:opacity-80 transition-opacity">
-                  <img src={`${API_ORIGIN}${url}`} alt="" className="w-full h-full object-cover" />
+                  <img src={fileUrl(url)} alt="" className="w-full h-full object-cover" />
                 </a>
               ))}
             </div>
@@ -189,9 +190,9 @@ export default function TicketDetail() {
                 {reply.attachments && reply.attachments.length > 0 && (
                   <div className="flex gap-2 mt-2 ml-9 flex-wrap">
                     {reply.attachments.map((url, i) => (
-                      <a key={i} href={`${API_ORIGIN}${url}`} target="_blank" rel="noopener noreferrer"
+                      <a key={i} href={fileUrl(url)} target="_blank" rel="noopener noreferrer"
                         className="block w-20 h-20 rounded border border-gray-200 dark:border-gray-700 overflow-hidden hover:opacity-80 transition-opacity">
-                        <img src={`${API_ORIGIN}${url}`} alt="" className="w-full h-full object-cover" />
+                        <img src={fileUrl(url)} alt="" className="w-full h-full object-cover" />
                       </a>
                     ))}
                   </div>

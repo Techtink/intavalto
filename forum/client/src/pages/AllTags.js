@@ -5,6 +5,7 @@ import useAuthStore from '../store/authStore';
 import LanguageSelector from '../components/LanguageSelector';
 
 const API_ORIGIN = process.env.REACT_APP_API_URL || `${window.location.origin}/api`;
+const fileUrl = (url) => (!url || url.startsWith('http')) ? url : `${API_ORIGIN}${url}`;
 
 export default function AllTags() {
   const [tags, setTags] = useState([]);
@@ -44,7 +45,7 @@ export default function AllTags() {
         ]);
         setTags(Array.isArray(tagsRes.data) ? tagsRes.data : []);
         setCategories(Array.isArray(catRes.data) ? catRes.data : []);
-        if (logoRes.data?.logoUrl) setLogoUrl(`${API_ORIGIN}${logoRes.data.logoUrl}`);
+        if (logoRes.data?.logoUrl) setLogoUrl(fileUrl(logoRes.data.logoUrl));
         if (bannerRes.data?.bannerEnabled) setBanner(bannerRes.data);
       } catch (err) {
         console.error('Failed to load tags:', err);
@@ -260,7 +261,7 @@ export default function AllTags() {
           {banner && (
             <div className="mx-4 lg:mx-5 mt-4 rounded-lg overflow-hidden relative" style={{ minHeight: '140px' }}>
               {banner.bannerImageUrl ? (
-                <img src={`${API_ORIGIN}${banner.bannerImageUrl}`} alt="Forum banner"
+                <img src={fileUrl(banner.bannerImageUrl)} alt="Forum banner"
                   className="absolute inset-0 w-full h-full object-cover" />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-500" />
