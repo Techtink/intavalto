@@ -36,5 +36,6 @@ router.put('/settings/logo', uploadLogo.single('logo'), adminController.updateLo
 router.put('/settings/email', adminController.updateEmailSettings);
 router.put('/settings/sms', adminController.updateSmsSettings);
 router.put('/settings/about', adminController.updateAboutSettings);
+router.put('/settings/social', adminController.updateSocialSettings);
 
 module.exports = router;

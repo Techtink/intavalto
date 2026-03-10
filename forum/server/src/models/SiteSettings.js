@@ -87,6 +87,27 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    // Social Media URLs
+    socialFacebook: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    socialX: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    socialInstagram: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    socialYoutube: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    socialTiktok: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     // SMS (Termii) Configuration
     termiiApiKey: {
       type: DataTypes.STRING,

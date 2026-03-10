@@ -71,6 +71,11 @@ const runMigrations = async () => {
     ['conditionsContent',     'TEXT'],
     ['termiiApiKey',          'VARCHAR(255)'],
     ['termiiSenderId',        'VARCHAR(11)'],
+    ['socialFacebook',        'VARCHAR(255)'],
+    ['socialX',               'VARCHAR(255)'],
+    ['socialInstagram',       'VARCHAR(255)'],
+    ['socialYoutube',         'VARCHAR(255)'],
+    ['socialTiktok',          'VARCHAR(255)'],
   ];
   for (const [col, type] of cols) {
     try {

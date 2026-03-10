@@ -3,6 +3,7 @@ import api from '../../utils/api';
 import { useTranslation } from '../../i18n';
 import EmailSection from './settings/EmailSection';
 import SmsSection from './settings/SmsSection';
+import SocialSection from './settings/SocialSection';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -315,6 +316,7 @@ export default function BannerSettings() {
 
       <EmailSection settings={settings} onSuccess={showSuccess} onError={setError} />
       <SmsSection settings={settings} onSuccess={showSuccess} onError={setError} />
+      <SocialSection settings={settings} onSuccess={showSuccess} onError={setError} />
 
       {/* About Page Settings */}
       <form onSubmit={handleSaveAbout} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 max-w-2xl mt-6 transition-colors">

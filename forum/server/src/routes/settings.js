@@ -104,4 +104,25 @@ router.get('/about', async (req, res) => {
   }
 });
 
+// Public endpoint — returns social media URLs (no auth required)
+router.get('/social', async (req, res) => {
+  try {
+    const settings = await SiteSettings.findOne({
+      attributes: ['socialFacebook', 'socialX', 'socialInstagram', 'socialYoutube', 'socialTiktok'],
+    });
+    res.json({
+      socialFacebook: settings?.socialFacebook || null,
+      socialX: settings?.socialX || null,
+      socialInstagram: settings?.socialInstagram || null,
+      socialYoutube: settings?.socialYoutube || null,
+      socialTiktok: settings?.socialTiktok || null,
+    });
+  } catch (error) {
+    res.json({
+      socialFacebook: null, socialX: null, socialInstagram: null,
+      socialYoutube: null, socialTiktok: null,
+    });
+  }
+});
+
 module.exports = router;

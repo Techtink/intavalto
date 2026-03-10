@@ -423,6 +423,30 @@ const updateAboutSettings = async (req, res) => {
   }
 };
 
+// Social Media Settings
+const updateSocialSettings = async (req, res) => {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      settings = await SiteSettings.create({});
+    }
+
+    const { socialFacebook, socialX, socialInstagram, socialYoutube, socialTiktok } = req.body;
+
+    if (socialFacebook !== undefined) settings.socialFacebook = socialFacebook;
+    if (socialX !== undefined) settings.socialX = socialX;
+    if (socialInstagram !== undefined) settings.socialInstagram = socialInstagram;
+    if (socialYoutube !== undefined) settings.socialYoutube = socialYoutube;
+    if (socialTiktok !== undefined) settings.socialTiktok = socialTiktok;
+
+    await settings.save();
+    res.json({ message: 'Social media settings updated', settings });
+  } catch (error) {
+    logger.error('Error updating social media settings', error);
+    res.status(500).json({ message: 'Failed to update social media settings' });
+  }
+};
+
 // Create User (admin only)
 const createUser = async (req, res) => {
   try {
@@ -485,5 +509,6 @@ module.exports = {
   updateEmailSettings,
   updateSmsSettings,
   updateAboutSettings,
+  updateSocialSettings,
   createUser,
 };
