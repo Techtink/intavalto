@@ -315,7 +315,7 @@ export default function About() {
         {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
         {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1 min-w-0 bg-[#eee] dark:bg-gray-900 transition-colors">
+        <main className="flex-1 min-w-0 overflow-hidden bg-[#eee] dark:bg-gray-900 transition-colors">
 
           {/* ===== BANNER (same as forum page) ===== */}
           {banner && (
@@ -376,10 +376,11 @@ export default function About() {
           ) : !stats ? (
             <div className="text-center py-16 text-gray-400 dark:text-gray-500">{t('about.loadFailed')}</div>
           ) : activeTab !== 'about' ? (
-            <div className="mx-4 lg:mx-5 mt-6 pb-10">
+            <div className="mx-4 lg:mx-5 mt-6 pb-10 overflow-hidden">
               {stats[`${activeTab}Content`] ? (
                 <div
-                  className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 [&_h1]:text-[17px] [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:dark:text-gray-100 [&_h2]:text-[15px] [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h2]:dark:text-gray-100 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:dark:text-gray-200 [&_p]:text-[13px] [&_p]:leading-relaxed [&_li]:text-[13px] [&_a]:text-[#50ba4b] [&_a]:hover:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#50ba4b] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500"
+                  className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 break-words [&_h1]:text-[17px] [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:dark:text-gray-100 [&_h2]:text-[15px] [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h2]:dark:text-gray-100 [&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:text-gray-800 [&_h3]:dark:text-gray-200 [&_p]:text-[13px] [&_p]:leading-relaxed [&_li]:text-[13px] [&_a]:text-[#50ba4b] [&_a]:hover:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#50ba4b] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-500"
+                  style={{ overflowWrap: 'anywhere' }}
                   dangerouslySetInnerHTML={{ __html: stats[`${activeTab}Content`] }}
                 />
               ) : (

@@ -69,6 +69,21 @@ services:
       - key: ADMIN_PASSWORD
         type: SECRET
         scope: RUN_TIME
+      - key: DO_SPACES_KEY
+        type: SECRET
+        scope: RUN_TIME
+      - key: DO_SPACES_SECRET
+        type: SECRET
+        scope: RUN_TIME
+      - key: DO_SPACES_BUCKET
+        value: "afrothread"
+        scope: RUN_TIME
+      - key: DO_SPACES_ENDPOINT
+        value: "https://ams3.digitaloceanspaces.com"
+        scope: RUN_TIME
+      - key: DO_SPACES_REGION
+        value: "ams3"
+        scope: RUN_TIME
 
 static_sites:
   - name: client
