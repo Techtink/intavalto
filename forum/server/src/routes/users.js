@@ -8,6 +8,7 @@ const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
 const { getFileUrl, useSpaces } = require('../utils/storage');
+const { checkAutobiographer } = require('../utils/badgeAwarder');
 
 const { Op } = require('sequelize');
 
@@ -100,6 +101,7 @@ router.put('/:id', authenticate, validateProfileUpdate, handleValidationErrors, 
     if (location !== undefined) user.location = location;
 
     await user.save();
+    checkAutobiographer(req.user.id).catch(() => {});
     res.json({ message: 'Profile updated', user });
   } catch (error) {
     logger.error('Error updating user profile', error);
@@ -130,6 +132,7 @@ router.put('/:id/avatar', authenticate, uploadAvatar.single('avatar'), async (re
 
     user.avatar = getFileUrl(req.file, 'avatars');
     await user.save();
+    checkAutobiographer(req.user.id).catch(() => {});
 
     res.json({ message: 'Avatar updated', user });
   } catch (error) {

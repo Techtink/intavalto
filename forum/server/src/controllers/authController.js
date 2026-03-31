@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User, UserBadge } = require('../models');
 const logger = require('../utils/logger');
+const { checkOnLogin } = require('../utils/badgeAwarder');
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -65,6 +66,9 @@ const login = async (req, res) => {
     if (user.isBanned) {
       return res.status(403).json({ message: 'Your account has been banned', reason: user.banReason });
     }
+
+    // Run login-time badge checks (autobiographer, anniversary)
+    try { await checkOnLogin(user.id); } catch (_) { /* non-fatal */ }
 
     // Fetch and mark-seen any new badges
     let newBadges = [];

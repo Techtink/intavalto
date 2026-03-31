@@ -6,6 +6,7 @@ const { validateCreatePost, handleValidationErrors } = require('../middleware/va
 const { postLimiter } = require('../middleware/rateLimiter');
 const { Post, User, Product, Category, Comment } = require('../models');
 const logger = require('../utils/logger');
+const { checkOnContentCreated, checkLikeBadges } = require('../utils/badgeAwarder');
 
 const router = express.Router();
 
@@ -187,7 +188,8 @@ router.get('/:id', async (req, res) => {
         { model: Product, attributes: ['id', 'name', 'color'] },
         { model: Category, attributes: ['id', 'name', 'color'] },
         { model: Comment, include: [{ model: User, attributes: ['id', 'username', 'avatar'] }] }
-      ]
+      ],
+      order: [[Comment, 'createdAt', 'DESC']]
     });
 
     if (!post) return res.status(404).json({ message: 'Post not found' });
@@ -209,6 +211,7 @@ router.post('/:id/like', authenticate, async (req, res) => {
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
     await Post.increment('likes', { where: { id: post.id } });
+    checkLikeBadges(req.user.id, post).catch(() => {});
     res.json({ message: 'Post liked', likes: post.likes + 1 });
   } catch (error) {
     logger.error('Error liking post', error);
@@ -232,6 +235,7 @@ router.post('/', authenticate, postLimiter, validateCreatePost, handleValidation
       tags: tags || []
     });
 
+    checkOnContentCreated(req.user.id, content).catch(() => {});
     res.status(201).json({ message: 'Post created', post });
   } catch (error) {
     logger.error('Error creating post', error);

@@ -325,7 +325,6 @@ export default function Forum() {
               ) : (
                 <span className="text-[18px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">Intavalto</span>
               )}
-              <span className="text-[18px] font-light text-gray-500 dark:text-gray-400">Forum</span>
             </Link>
           </div>
 

@@ -3,6 +3,7 @@ const { authenticate } = require('../middleware/auth');
 const { validateComment, handleValidationErrors } = require('../middleware/validation');
 const { Comment, Post, User } = require('../models');
 const logger = require('../utils/logger');
+const { checkOnContentCreated } = require('../utils/badgeAwarder');
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.get('/post/:postId', async (req, res) => {
     const comments = await Comment.findAll({
       where: { postId: req.params.postId, isApproved: true },
       include: [{ model: User, attributes: ['id', 'username', 'avatar', 'reputation'] }],
-      order: [['likes', 'DESC'], ['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']]
     });
     res.json(comments);
   } catch (error) {
@@ -37,6 +38,7 @@ router.post('/', authenticate, validateComment, handleValidationErrors, async (r
       userId: req.user.id
     });
 
+    checkOnContentCreated(req.user.id, content).catch(() => {});
     res.status(201).json({ message: 'Comment created', comment });
   } catch (error) {
     logger.error('Error creating comment', error);
